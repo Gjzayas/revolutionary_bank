@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Hyperlink?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.PasswordField?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.image.Image?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.text.Font?>
+
+<AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="600.0" prefWidth="600.0" styleClass="login-root" stylesheets="@../style/style.css" xmlns="http://javafx.com/javafx/23.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="OnlineBanking.SignupController">
+   <children>
+      <VBox alignment="CENTER" layoutX="155.0" layoutY="158.0" prefHeight="400.0" prefWidth="300.0" spacing="10.0">
+         <padding>
+            <Insets bottom="20.0" left="20.0" right="20.0" top="20.0" />
+         </padding>
+         <children>
+            <Label text="Create a new Account" textFill="SILVER">
+               <font>
+                  <Font size="24.0" />
+               </font>
+               <padding>
+                  <Insets top="10.0" />
+               </padding>
+            </Label>
+            <TextField fx:id="fullNameField" promptText="Full Name" styleClass="navy-input" />
+            <TextField fx:id="usernameField" promptText="Choose Username" styleClass="navy-input" />
+            <PasswordField fx:id="passwordField" promptText="Choose Password" styleClass="navy-input" />
+            <PasswordField fx:id="confirmPasswordField" promptText="Confirm Password" styleClass="navy-input" />
+            <TextField fx:id="questionField" promptText="Security Question" styleClass="navy-input" />
+            <TextField fx:id="answerField" promptText="Security Answer" styleClass="navy-input" />
+            <TextField fx:id="initialDepositField" promptText="Initial Deposit ($)" styleClass="navy-input" />
+            <Button fx:id="createAccountButton" mnemonicParsing="false" onAction="#handleSignup" styleClass="silver-button" text="Register" />
+            <Hyperlink onAction="#handleBackToLogin" styleClass="silver-outline-button" text="Back to Login" />
+            <Label fx:id="messageLabel" textFill="#d41818" />
+         </children>
+      </VBox>
+      <HBox layoutX="200.0" prefHeight="100.0" prefWidth="200.0">
+         <children>
+            <ImageView fitHeight="200.0" fitWidth="200.0" pickOnBounds="true" preserveRatio="true" HBox.hgrow="ALWAYS">
+               <image>
+                  <Image url="@../images/Rev_Logo.png" />
+               </image>
+               <HBox.margin>
+                  <Insets />
+               </HBox.margin>
+            </ImageView>
+         </children>
+         <opaqueInsets>
+            <Insets />
+         </opaqueInsets>
+      </HBox>
+   </children>
+</AnchorPane>

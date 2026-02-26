@@ -1,0 +1,251 @@
+/* style.css */
+
+/* Main container - Midnight Navy Gradient */
+.login-root {
+    -fx-background-color: linear-gradient(to bottom, #001f3f, #000b1a);
+}
+
+/* Institutional Silver Button */
+.silver-button {
+    -fx-background-color: linear-gradient(#f2f2f2, #c0c0c0);
+    -fx-text-fill: #001f3f;
+    -fx-font-weight: bold;
+    -fx-background-radius: 4;
+    -fx-padding: 8 10 8 10;
+}
+
+.silver-button:hover {
+    -fx-background-color: linear-gradient(#ffffff, #e6e6e6);
+}
+
+/* Modern Input Fields */
+.navy-input {
+    -fx-background-color: rgba(255, 255, 255, 0.05);
+    -fx-border-color: #c0c0c0;
+    -fx-border-width: 0 0 1 0; /* Underline only */
+    -fx-text-fill: white;
+    -fx-prompt-text-fill: #808080;
+}
+
+.navy-input:focused {
+    -fx-border-color: #ffffff;
+    -fx-background-color: rgba(255, 255, 255, 0.1);
+}
+
+/* Links (Signup/Forgot Password) */
+.silver-link {
+    -fx-text-fill: #c0c0c0;
+    -fx-underline: false;
+}
+
+.silver-link:hover {
+    -fx-text-fill: white;
+}
+
+
+/* style.css additions */
+
+/* Secondary Button (e.g., "Back to Login") */
+.silver-outline-button {
+    -fx-background-color: transparent;
+    -fx-border-color: #c0c0c0;
+    -fx-border-radius: 4;
+    -fx-text-fill: #c0c0c0;
+}
+
+.silver-outline-button:hover {
+    -fx-border-color: #ffffff;
+    -fx-text-fill: #ffffff;
+    -fx-background-color: rgba(192, 192, 192, 0.1);
+}
+
+/* Styling the Instruction Text */
+.instruction-text {
+    -fx-text-fill: #c0c0c0;
+    -fx-font-size: 18px;
+    -fx-font-style: italic;
+    -fx-wrap-text: true;
+    -fx-text-alignment: center;
+    -fx-max-width: 400px;
+    -fx-pref-width: 400px;
+}
+
+/* Informational text for security steps */
+.security-note {
+    -fx-text-fill: #A0A0A0;
+    -fx-font-size: 12px;
+    -fx-font-style: italic;
+    -fx-wrap-text: true;
+    -fx-text-alignment: CENTER;
+}
+
+/* Success message styling */
+.success-label {
+    -fx-text-fill: #00FF7F; /* Sea Green for success on dark background */
+    -fx-font-weight: bold;
+}
+
+/* Dashboard Main Container */
+.dashboard-root {
+    -fx-background-color: #000b1a; /* Dark Navy */
+}
+
+/* The Sidebar Area */
+.sidebar {
+    -fx-background-color: linear-gradient(to bottom, #1a1a1a, #0d0d0d);
+    -fx-border-color: #c0c0c0;
+    -fx-border-width: 1 1 0 0; /* Silver line on the right side only */
+}
+
+/* Navigation Buttons in Sidebar */
+.nav-button {
+    -fx-background-color: transparent;
+    -fx-text-fill: #c0c0c0;
+    -fx-font-size: 14px;
+    -fx-alignment: CENTER_LEFT;
+    -fx-padding: 10 20 10 20;
+    -fx-cursor: hand;
+}
+
+.nav-button:hover {
+    -fx-background-color: rgba(192, 192, 192, 0.1);
+    -fx-text-fill: white;
+}
+
+/* The active/selected page button */
+.nav-button-active {
+    -fx-background-color: #c0c0c0;
+    -fx-text-fill: #000b1a;
+    -fx-font-weight: bold;
+}
+
+/* Account Summary Card */
+.account-card {
+    -fx-background-color: linear-gradient(to bottom right, #001f3f, #003366);
+    -fx-background-radius: 15;
+    -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.6), 15, 0, 0, 8);
+    -fx-padding: 30;
+}
+
+/* Account balance label */
+.balance-label {
+    -fx-text-fill: #FFFFFF;
+    -fx-font-size: 32px;
+    -fx-font-weight: bold;
+}
+
+/* Container for the History view */
+.history-root {
+    -fx-background-color: #000b1a;
+    -fx-padding: 20;
+}
+
+/* TableView Base Styling */
+.table-view {
+    -fx-background-color: transparent;
+    -fx-border-color: #c0c0c0;
+    -fx-border-width: 1;
+    -fx-border-radius: 5;
+}
+
+/* Header row (Silver gradient) */
+.table-view .column-header-background {
+    -fx-background-color: linear-gradient(to bottom, #f2f2f2, #c0c0c0);
+    -fx-background-radius: 5 5 0 0;
+}
+
+.table-view .column-header {
+    -fx-background-color: transparent;
+    -fx-size: 40;
+}
+
+.table-view .column-header .label {
+    -fx-text-fill: #001f3f; /* Navy text on silver header */
+    -fx-font-weight: bold;
+}
+
+/* Table Rows */
+.table-row-cell {
+    -fx-background-color: #001f3f;
+    -fx-text-fill: #ffffff;
+    -fx-border-color: #002b59;
+    -fx-border-width: 0 0 1 0;
+}
+
+.table-row-cell:odd {
+    -fx-background-color: #00152b; /* Slightly darker for stripes */
+}
+
+.table-row-cell:hover {
+    -fx-background-color: #003366; /* Highlight on hover */
+}
+
+.table-row-cell:selected {
+    -fx-background-color: #c0c0c0;
+}
+
+.table-row-cell:selected .text {
+    -fx-fill: #001f3f; /* Dark text when row is selected */
+}
+
+/* Scrollbar styling to match the theme */
+.table-view .scroll-bar:vertical {
+    -fx-background-color: transparent;
+}
+
+/* Targets the actual text data inside every row */
+.table-view .table-cell {
+    -fx-text-fill: #c0c0c0; /* Silver */
+    -fx-font-size: 13px;
+}
+
+/* Specifically ensures that even after being deselected, the row remains silver */
+.table-row-cell:filled .table-cell{
+    -fx-text-fill: #c0c0c0;
+}
+
+/* Keeps the dark navy text ONLY when the row is currently selected for high contrast */
+.table-row-cell:filled:selected .table-cell{
+    -fx-text-fill: #001f3f; 
+}
+
+/* Ensures the text doesn't flip to black when hovering over a deselected row */
+.table-row-cell:filled:hover .table-cell {
+    -fx-text-fill: #ffffff;
+}
+
+/* Makes the text pure white when a row is hovered for better focus */
+.table-row-cell:hover .table-cell {
+    -fx-text-fill: #ffffff;
+}
+
+/* Ensures selected rows have dark text to contrast against the silver selection bar */
+.table-row-cell:selected .table-cell {
+    -fx-text-fill: #001f3f; 
+}
+
+/* Direct targeting of the text nodes within cells */
+.table-view .table-cell .text {
+    -fx-fill: #c0c0c0 !important;
+}
+
+/* Ensure that when a row is selected, the text node turns navy */
+.table-view .table-row-cell:selected .table-cell .text {
+    -fx-fill: #001f3f !important;
+}
+
+/* Fix for the specific 'black text' ghosting on deselection */
+.table-view .table-row-cell:focused .table-cell {
+    -fx-text-fill: #c0c0c0 !important;
+}
+
+/* Classes to be used in Java Controller CellFactories */
+.text-deposit {
+    -fx-text-fill: #00FF7F; /* Sea Green */
+    -fx-font-weight: bold;
+}
+
+.text-withdrawal {
+    -fx-text-fill: #FF4500; /* Orange Red or Silver-Red */
+    -fx-font-weight: bold;
+}
