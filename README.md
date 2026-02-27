@@ -20,6 +20,7 @@ CSS: Custom styling for the "Version 2.0" brand identity.
 
 
 Getting Started
+
 Clone the repo: git clone https://github.com/Gjzayas/revolutionary_bank.git.
 
 Open in IDE: Import the project into NetBeans or your preferred Java IDE.
