@@ -19,7 +19,7 @@ SceneBuilder: Used for designing the responsive .fxml layouts.
 CSS: Custom styling for brand identity.
 
 
-Getting Started
+Getting Started:
 
 Clone the repo: git clone https://github.com/Gjzayas/revolutionary_bank.git.
 
