@@ -16,7 +16,7 @@ JavaFX: The core framework for the graphical user interface.
 
 SceneBuilder: Used for designing the responsive .fxml layouts.
 
-CSS: Custom styling for the "Version 2.0" brand identity.
+CSS: Custom styling for brand identity.
 
 
 Getting Started
