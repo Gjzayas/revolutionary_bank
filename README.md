@@ -45,7 +45,7 @@ Login after Signup Demonstration:
 https://github.com/user-attachments/assets/986fca8d-3049-4ab3-b5a7-d239cd3121b5
 
 
-Transfer Funds to another Account Demonstration:
+Transfering Funds to another Account Demonstration:
 
 
 https://github.com/user-attachments/assets/2b1d3f46-359c-463b-a3d4-a08c7bb54426
