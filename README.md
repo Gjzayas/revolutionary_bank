@@ -8,7 +8,7 @@ Dynamic Dashboard: Features a sidebar navigation system where buttons light up t
 
 Intelligent Transaction History: A styled TableView that utilizes custom CSS for a high-end financial ledger look, including alternate row striping.
 
-Secure Recovery: A dedicated "Forgot Password" flow with wrapped instruction text for better readability.
+Secure Recovery: A dedicated "Forgot Password" feature to recover personal accounts.
 
 
 Built With
@@ -25,4 +25,11 @@ Clone the repo: git clone https://github.com/Gjzayas/revolutionary_bank.git.
 Open in IDE: Import the project into NetBeans or your preferred Java IDE.
 
 Clean and Build: Ensure all CSS resources in the style/ directory are properly mapped to avoid StyleManager errors.
+Run the Banking application in the App.java class.
+
+Registration Signup/Login and Navigation Demonstration:
+https://github.com/user-attachments/assets/625dc067-39e7-49ae-9335-7aa1f5f9c07b
+
+
+
 
