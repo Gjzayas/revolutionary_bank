@@ -27,8 +27,15 @@ Open in IDE: Import the project into NetBeans or your preferred Java IDE.
 Clean and Build: Ensure all CSS resources in the style/ directory are properly mapped to avoid StyleManager errors.
 Run the Banking application in the App.java class.
 
+Demonstrations:
+
 Registration Signup/Login and Navigation Demonstration:
+
 https://github.com/user-attachments/assets/625dc067-39e7-49ae-9335-7aa1f5f9c07b
+
+
+https://github.com/user-attachments/assets/3b202960-afde-4ee5-8824-5a28faf78e21
+
 
 
 
