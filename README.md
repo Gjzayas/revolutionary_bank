@@ -127,8 +127,7 @@ Login after Signup Demonstration:
 https://github.com/user-attachments/assets/fd13a607-6378-4942-9836-c3e9affbc7fb
 
 
-Profile Update Demonstration:
-Updating User Fullname:
+Profile Update Demonstration - Updating User Fullname:
 
 
 https://github.com/user-attachments/assets/7170bf61-616f-44c4-b5f4-6cda585c143b
@@ -162,6 +161,9 @@ https://github.com/user-attachments/assets/ef1672b6-fae1-403f-a55a-714a4818a9be
 
 
 User Password Reset Demonstration:
+
+
+https://github.com/user-attachments/assets/5fc6aab9-bed9-41d6-9b22-2e9d3b7ac745
 
 
 https://github.com/user-attachments/assets/40429520-b3ed-41e8-9c18-f2a74fe6494a
