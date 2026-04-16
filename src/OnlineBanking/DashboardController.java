@@ -2,6 +2,7 @@
 package OnlineBanking;
 
 import java.io.IOException;
+import java.util.List;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
@@ -19,9 +20,14 @@ import javafx.scene.control.Button;
  * main BorderPane, and facilitates dependency injection of the BankAccount 
  * model into sub-controllers.
  * 
- * @author: Gabriel Zayas
- * Date: 2/20/2026
- * @version 2.0
+ * VERSION HISTORY:
+ * 1.0 - Initial GUI with static data.
+ * 2.0 - Implementation of Java Object Serialization for local persistence.
+ * 3.0 - Migration to MySQL RDBMS; added transaction atomicity and focus-based UI clearing.
+ *
+ * @author: Gabriel J. Zayas
+ * Date: 4/06/2026
+ * @version 3.0
  * 
  */
 public class DashboardController {
@@ -30,28 +36,41 @@ public class DashboardController {
     @FXML private Label welcomeLabel;
     
     /** The root layout container where different sub-views (Overview, Transfer, History) are loaded. */
-    @FXML private BorderPane mainPane; // The fx:id of root BorderPane in SceneBuilder
+    @FXML private BorderPane mainPane; 
     
+    /** Navigation button to return to the home/overview screen. */
     @FXML private Button homeBtn;
+    
+    /** Navigation button to open the fund transfer screen. */
     @FXML private Button transferBtn;
+    
+    /** Navigation button to view the transaction history table. */
     @FXML private Button historyBtn;
+    
+    /** Navigation button to view and edit user profile settings. */
+    @FXML private Button profileBtn;
 
     /** The data model representing the currently authenticated user's account. */
     private BankAccount userAccount; // The injected Model
 
     /**
      * Initializes the dashboard with the authenticated user's data.
-     * This method is called by the LoginController to "inject" the account model,
-     * personalize the UI with the user's first name, and load the initial Overview page.
-     * * @param account The BankAccount object belonging to the authenticated user.
+     * Called by LoginController to inject the model, sync database history, 
+     * and set the initial greeting before loading the Overview page.
+     * 
+     * @param account The BankAccount object belonging to the authenticated user.
      */
     public void setUserAccount(BankAccount account) {
-        // 1. Assign the account to the Dashboard's master variable FIRST
+        // Assign the account to the Dashboard's master variable
         this.userAccount = account;
         
-        // 2. Logic to extract the First Name from the full name string
+        // FETCH fresh transaction history from the database using the User ID
+        List<Transaction> dbHistory = UserStore.loadTransactionHistory(userAccount.getId());
+        userAccount.getTransactionHistory().clear();
+        userAccount.getTransactionHistory().addAll(dbHistory);
+
+        // Logic to extract the First Name from the full name string
         if (userAccount.getFullName() != null && !userAccount.getFullName().isEmpty()) {
-            
             // Split by space and take the first part to keep the greeting friendly
             String firstName = userAccount.getFullName().split(" ")[0];
             welcomeLabel.setText("Welcome, " + firstName + "!");
@@ -59,20 +78,23 @@ public class DashboardController {
         } else {
             welcomeLabel.setText("Welcome User!");
         }
-        
-        // 3. Load the default landing page once the account data is available
+
+        // Load the default landing page once the account data is available
         showOverview(); 
     }
     
     /**
+     * Manages the visual state of the sidebar navigation.
+     * Removes the 'active' CSS class from all buttons and applies it to the selected one.
      * 
-     * This "cleans" the buttons so only one is highlighted at a time.
+     * @param activeBtn The button that was recently clicked by the user.
      */
     private void setActiveButton(Button activeBtn) {
         // Remove the active class from ALL navigation buttons
         homeBtn.getStyleClass().remove("nav-button-active");
         transferBtn.getStyleClass().remove("nav-button-active");
         historyBtn.getStyleClass().remove("nav-button-active");
+        profileBtn.getStyleClass().remove("nav-button-active");
 
         // Add the active class to the one that was just clicked
         if (!activeBtn.getStyleClass().contains("nav-button-active")) {
@@ -84,18 +106,28 @@ public class DashboardController {
      * Centralized utility to load FXML sub-views into the center of the main BorderPane.
      * This method handles the logic of loading the file, swapping the view, and 
      * ensuring the sub-controller receives the current userAccount data.
-     * * @param fxmlFileName The name of the FXML file (without the .fxml extension) to be loaded.
+     * 
+     * @param fxmlFileName The name of the FXML file (without the .fxml extension) to be loaded.
      */
     private void loadPage(String fxmlFileName) {
         try {
+            // REFRESH: Fetch the absolute latest from DB before showing any sub-page
+            // This ensures the balance and transaction list are always accurate
+            BankAccount latestData = UserStore.findAccountByNumber(userAccount.getAccountNumber());
+            
+            if (latestData != null) {
+                this.userAccount = latestData;
+                // Re-sync the transactions list
+                this.userAccount.getTransactionHistory().clear();
+                this.userAccount.getTransactionHistory().addAll(UserStore.loadTransactionHistory(userAccount.getId()));
+            }
+
+            // Load the FXML
             FXMLLoader loader = new FXMLLoader(getClass().getResource("views/" + fxmlFileName + ".fxml"));
             Parent root = loader.load();
 
-            // Dependency Injection Logic:
-            // Retrieve the controller instance created by the FXMLLoader
+            // Inject the refreshed data based on the specific controller type
             Object controller = loader.getController();
-
-            // Pass the account data to the specific controller
             if (controller instanceof OverviewController) {
                 ((OverviewController) controller).setAccount(userAccount);
             
@@ -104,9 +136,14 @@ public class DashboardController {
             
             } else if (controller instanceof HistoryController) {
                 ((HistoryController) controller).setAccount(userAccount);
+            
+            } else if (controller instanceof ProfileController) {
+                ProfileController profileCtrl = (ProfileController) controller;
+                profileCtrl.setUserId(userAccount.getId());
+                // Inject the dashboard controller so the profile can talk back to it
+                profileCtrl.setParentController(this);
             }
 
-            // Swap the center of the BorderPane with the newly loaded root node
             mainPane.setCenter(root);
 
         } catch (IOException e) {
@@ -116,7 +153,7 @@ public class DashboardController {
     }
 
     /**
-     * Navigates the user to the Overview sub-view.
+     * Navigates the user to the Overview sub-view and updates button styling.
      */
     @FXML
     private void showOverview() {
@@ -125,7 +162,7 @@ public class DashboardController {
     }
 
     /**
-     * Navigates the user to the Transfer sub-view.
+     * Navigates the user to the Transfer sub-view and updates button styling.
      */
     @FXML
     private void showTransfer() {
@@ -134,7 +171,7 @@ public class DashboardController {
     }
 
     /**
-     * Navigates the user to the Transaction History sub-view.
+     * Navigates the user to the Transaction History sub-view and updates button styling.
      */
     @FXML
     private void showHistory() {
@@ -143,34 +180,70 @@ public class DashboardController {
     }
     
     /**
-     * Handles the logout process by returning the user to the primary login screen.
-     * This method clears the current dashboard stage and re-initializes the login view.
-     * * @param event The ActionEvent triggered by clicking the logout button.
+     * Navigates the user to the Profile/Settings sub-view and updates button styling.
      */
     @FXML
-    private void handleLogout(ActionEvent event) {
+    private void showProfile() {
+        loadPage("Profile");
+        setActiveButton(profileBtn);
+    }
+    
+    /**
+     * Handles the logout process by clearing the session and returning to the login screen.
+     * Safely identifies the current stage regardless of how the method was triggered.
+     * 
+     * @param event The ActionEvent triggered by the logout button; can be null if called programmatically.
+     */
+    @FXML
+    public void handleLogout(ActionEvent event) {
+        // Clear the session data
+        SessionManager.clearSession();
+        
         try {
-        // 1. Load the primary Login FXML view
-        FXMLLoader loader = new FXMLLoader(getClass().getResource("views/OnlineBankingView.fxml"));
-        Parent loginView = loader.load();
+            // Identify the current application window (Stage) safely
+            Stage stage;
+            if (event != null && event.getSource() instanceof Node) {
+                // Standard button click path
+                stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
+            
+            } else {
+                stage = (Stage) welcomeLabel.getScene().getWindow(); 
+            }
 
-        // 2. Identify the current application window (Stage)
-        Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
+            // Load the primary Login FXML view
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("views/OnlineBankingView.fxml"));
+            Parent loginView = loader.load();
 
-        // 3. Configure and display the login scene
-        Scene scene = new Scene(loginView);
-        stage.setScene(scene);
-        stage.setTitle("Revolutionary Bank Login");
-        stage.setResizable(false);
-        
-        // 4. Center the window on the user's screen for better UX
-        stage.centerOnScreen();
-        
-        stage.show();
+            // Configure and display the login scene
+            Scene scene = new Scene(loginView);
+            stage.setScene(scene);
+            stage.setTitle("Revolutionary Bank Login");
+            stage.setResizable(false);
 
-        } catch (IOException e) {
-            System.err.println("Logout Error: Could not find OnlineBankingView.fxml");
-            e.printStackTrace();
+            // Center the window on the user's screen
+            stage.centerOnScreen();
+            stage.show();
+
+            } catch (IOException e) {
+                System.err.println("Logout Error: Could not find OnlineBankingView.fxml");
+                e.printStackTrace();
         }
+    }
+    
+    /** Updates the welcome label by fetching the latest account name from the database.
+     * Specifically used after a user updates their name in the Profile view.
+    */
+    public void refreshWelcomeMessage() {
+       // Fetch latest data to ensure we have the new name
+       BankAccount latest = UserStore.findAccountByNumber(userAccount.getAccountNumber());
+       
+       if (latest != null) {
+           this.userAccount = latest;
+           
+           if (userAccount.getFullName() != null && !userAccount.getFullName().isEmpty()) {
+               String firstName = userAccount.getFullName().split(" ")[0];
+               welcomeLabel.setText("Welcome, " + firstName + "!");
+           }
+       }
     }
 }
