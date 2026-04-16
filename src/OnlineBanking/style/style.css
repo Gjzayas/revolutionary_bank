@@ -1,11 +1,38 @@
-/* style.css */
+/* 
+ * style.css
+ * Theme: Revolutionary Bank "Executive" Aesthetic
+ * Primary Palette: Midnight Navy (#001f3f), Institutional Silver (#c0c0c0)
+ * Logic: High-contrast professional interface with subtle gradients.
+ * @author: Gabriel J. Zayas
+ * Date: 4/15/2026
+ * @version 3.0
+ */
 
-/* Main container - Midnight Navy Gradient */
+/* --- LOGIN & ROOT CONTAINERS --- */
+
+/**
+ * Main container for login and registration screens.
+ * Uses a deep vertical gradient to create depth and focus on the central form.
+ */
 .login-root {
     -fx-background-color: linear-gradient(to bottom, #001f3f, #000b1a);
 }
 
-/* Institutional Silver Button */
+/**
+ * Dashboard main background.
+ * A flat dark navy to serve as a neutral base for complex dashboard widgets.
+ */
+.dashboard-root {
+    -fx-background-color: #000b1a; 
+}
+
+
+/* --- BUTTONS & INTERACTIVE ELEMENTS --- */
+
+/**
+ * Primary action button (e.g., Login, Submit).
+ * Designed to look like a metallic "Institutional Silver" plaque.
+ */
 .silver-button {
     -fx-background-color: linear-gradient(#f2f2f2, #c0c0c0);
     -fx-text-fill: #001f3f;
@@ -18,34 +45,10 @@
     -fx-background-color: linear-gradient(#ffffff, #e6e6e6);
 }
 
-/* Modern Input Fields */
-.navy-input {
-    -fx-background-color: rgba(255, 255, 255, 0.05);
-    -fx-border-color: #c0c0c0;
-    -fx-border-width: 0 0 1 0; /* Underline only */
-    -fx-text-fill: white;
-    -fx-prompt-text-fill: #808080;
-}
-
-.navy-input:focused {
-    -fx-border-color: #ffffff;
-    -fx-background-color: rgba(255, 255, 255, 0.1);
-}
-
-/* Links (Signup/Forgot Password) */
-.silver-link {
-    -fx-text-fill: #c0c0c0;
-    -fx-underline: false;
-}
-
-.silver-link:hover {
-    -fx-text-fill: white;
-}
-
-
-/* style.css additions */
-
-/* Secondary Button (e.g., "Back to Login") */
+/**
+ * Secondary/Ghost button for less critical actions.
+ * Transparent background with a silver border to reduce visual competition with primary buttons.
+ */
 .silver-outline-button {
     -fx-background-color: transparent;
     -fx-border-color: #c0c0c0;
@@ -59,6 +62,114 @@
     -fx-background-color: rgba(192, 192, 192, 0.1);
 }
 
+/**
+ * Dangerous action button (e.g., Account Deletion).
+ * Distinct red color to alert the user of irreversible actions.
+ */
+.red-button {
+    -fx-background-color: #d32f2f;
+    -fx-text-fill: white;
+    -fx-cursor: hand;
+}
+
+.red-button:hover {
+    -fx-background-color: #b71c1c;
+}
+
+/**
+ * Hyperlinks for navigation within the login flow.
+ */
+.silver-link {
+    -fx-text-fill: #c0c0c0;
+    -fx-underline: false;
+}
+
+.silver-link:hover {
+    -fx-text-fill: white;
+}
+
+/**
+ * Transparent wrapper for SVG or Image-based buttons.
+ */
+.icon-button {
+    /* Remove default button background and border */
+    -fx-background-color: transparent;
+    -fx-background-radius: 0;
+    -fx-border-width: 0;
+    -fx-padding: 0; /* Important: removes extra button spacing */
+    -fx-cursor: hand;
+}
+
+/* Add a hover effect for a professional feel */
+.icon-button:hover {
+    -fx-opacity: 0.7; /* Fades slightly when the user mouses over */
+}
+
+/* Add an active effect */
+.icon-button:pressed {
+    -fx-opacity: 0.5;
+}
+
+
+/* --- INPUT & FORM STYLING --- */
+
+/**
+ * Underlined modern input fields.
+ * Mimics a professional form by removing the bulky box-border in favor of a single bottom line.
+ */
+.navy-input {
+    -fx-background-color: rgba(255, 255, 255, 0.05);
+    -fx-border-color: #c0c0c0;
+    -fx-border-width: 0 0 1 0; /* Underline only */
+    -fx-text-fill: white;
+    -fx-prompt-text-fill: #808080;
+    -fx-padding: 5 35 5 10;
+}
+
+.navy-input:focused {
+    -fx-border-color: #ffffff;
+    -fx-background-color: rgba(255, 255, 255, 0.1);
+}
+
+
+/* --- NAVIGATION & SIDEBAR --- */
+
+/**
+ * Dashboard sidebar.
+ * Darker than the root container to create a clear structural divide.
+ */
+.sidebar {
+    -fx-background-color: linear-gradient(to bottom, #1a1a1a, #0d0d0d);
+    -fx-border-color: #c0c0c0;
+    -fx-border-width: 1 1 0 0; /* Silver border on right/top for separation */
+}
+
+/* Navigation Buttons in Sidebar */
+.nav-button {
+    -fx-background-color: transparent;
+    -fx-text-fill: #c0c0c0;
+    -fx-font-size: 14px;
+    -fx-alignment: CENTER_LEFT;
+    -fx-padding: 10 20 10 20;
+    -fx-cursor: hand;
+}
+
+.nav-button:hover {
+    -fx-background-color: rgba(192, 192, 192, 0.1);
+    -fx-text-fill: white;
+}
+
+/**
+ * Highlights the current active page in the sidebar.
+ */
+.nav-button-active {
+    -fx-background-color: #c0c0c0;
+    -fx-text-fill: #000b1a;
+    -fx-font-weight: bold;
+}
+
+
+/* --- TEXT & FEEDBACK --- */
 /* Styling the Instruction Text */
 .instruction-text {
     -fx-text-fill: #c0c0c0;
@@ -85,41 +196,13 @@
     -fx-font-weight: bold;
 }
 
-/* Dashboard Main Container */
-.dashboard-root {
-    -fx-background-color: #000b1a; /* Dark Navy */
-}
 
-/* The Sidebar Area */
-.sidebar {
-    -fx-background-color: linear-gradient(to bottom, #1a1a1a, #0d0d0d);
-    -fx-border-color: #c0c0c0;
-    -fx-border-width: 1 1 0 0; /* Silver line on the right side only */
-}
+/* --- DATA DISPLAYS & CARDS --- */
 
-/* Navigation Buttons in Sidebar */
-.nav-button {
-    -fx-background-color: transparent;
-    -fx-text-fill: #c0c0c0;
-    -fx-font-size: 14px;
-    -fx-alignment: CENTER_LEFT;
-    -fx-padding: 10 20 10 20;
-    -fx-cursor: hand;
-}
-
-.nav-button:hover {
-    -fx-background-color: rgba(192, 192, 192, 0.1);
-    -fx-text-fill: white;
-}
-
-/* The active/selected page button */
-.nav-button-active {
-    -fx-background-color: #c0c0c0;
-    -fx-text-fill: #000b1a;
-    -fx-font-weight: bold;
-}
-
-/* Account Summary Card */
+/**
+ * Primary Account card showing balance.
+ * Uses a subtle diagonal gradient to stand out from the dashboard background.
+ */
 .account-card {
     -fx-background-color: linear-gradient(to bottom right, #001f3f, #003366);
     -fx-background-radius: 15;
@@ -133,6 +216,9 @@
     -fx-font-size: 32px;
     -fx-font-weight: bold;
 }
+
+
+/* --- TABLEVIEW & TRANSACTION HISTORY --- */
 
 /* Container for the History view */
 .history-root {
@@ -148,15 +234,10 @@
     -fx-border-radius: 5;
 }
 
-/* Header row (Silver gradient) */
+/* Header styling (Silver plaque style) */
 .table-view .column-header-background {
     -fx-background-color: linear-gradient(to bottom, #f2f2f2, #c0c0c0);
     -fx-background-radius: 5 5 0 0;
-}
-
-.table-view .column-header {
-    -fx-background-color: transparent;
-    -fx-size: 40;
 }
 
 .table-view .column-header .label {
@@ -164,7 +245,7 @@
     -fx-font-weight: bold;
 }
 
-/* Table Rows */
+/* Table Rows Logic*/
 .table-row-cell {
     -fx-background-color: #001f3f;
     -fx-text-fill: #ffffff;
@@ -180,17 +261,13 @@
     -fx-background-color: #003366; /* Highlight on hover */
 }
 
+/**
+ * Selection logic.
+ * When a row is selected, the background turns silver.
+ * This requires the text to flip from white/silver to navy for contrast.
+ */
 .table-row-cell:selected {
     -fx-background-color: #c0c0c0;
-}
-
-.table-row-cell:selected .text {
-    -fx-fill: #001f3f; /* Dark text when row is selected */
-}
-
-/* Scrollbar styling to match the theme */
-.table-view .scroll-bar:vertical {
-    -fx-background-color: transparent;
 }
 
 /* Targets the actual text data inside every row */
@@ -199,34 +276,9 @@
     -fx-font-size: 13px;
 }
 
-/* Specifically ensures that even after being deselected, the row remains silver */
-.table-row-cell:filled .table-cell{
-    -fx-text-fill: #c0c0c0;
-}
-
-/* Keeps the dark navy text ONLY when the row is currently selected for high contrast */
-.table-row-cell:filled:selected .table-cell{
-    -fx-text-fill: #001f3f; 
-}
-
-/* Ensures the text doesn't flip to black when hovering over a deselected row */
-.table-row-cell:filled:hover .table-cell {
-    -fx-text-fill: #ffffff;
-}
-
-/* Makes the text pure white when a row is hovered for better focus */
-.table-row-cell:hover .table-cell {
-    -fx-text-fill: #ffffff;
-}
-
 /* Ensures selected rows have dark text to contrast against the silver selection bar */
 .table-row-cell:selected .table-cell {
     -fx-text-fill: #001f3f; 
-}
-
-/* Direct targeting of the text nodes within cells */
-.table-view .table-cell .text {
-    -fx-fill: #c0c0c0 !important;
 }
 
 /* Ensure that when a row is selected, the text node turns navy */
@@ -234,11 +286,46 @@
     -fx-fill: #001f3f !important;
 }
 
-/* Fix for the specific 'black text' ghosting on deselection */
+.table-view .column-header {
+    -fx-background-color: transparent;
+    -fx-size: 40;
+}
+
+.table-row-cell:selected .text {
+    -fx-fill: #001f3f; /* Dark text when row is selected */
+}
+
+/* Makes the text pure white when a row is hovered for better focus */
+.table-row-cell:hover .table-cell {
+    -fx-text-fill: #ffffff;
+}
+
+/* Specifically ensures that even after being deselected, the row remains silver */
+.table-row-cell:filled .table-cell{
+    -fx-text-fill: #c0c0c0;
+}
+
+/* Ensures the text doesn't flip to black when hovering over a deselected row */
+.table-row-cell:filled:hover .table-cell {
+    -fx-text-fill: #ffffff;
+}
+
+/* Keeps the dark navy text ONLY when the row is currently selected for high contrast */
+.table-row-cell:filled:selected .table-cell{
+    -fx-text-fill: #001f3f; 
+}
+
 .table-view .table-row-cell:focused .table-cell {
     -fx-text-fill: #c0c0c0 !important;
 }
 
+/* Scrollbar styling to match the theme */
+.table-view .scroll-bar:vertical {
+    -fx-background-color: transparent;
+}
+
+
+/* --- SPECIAL TRANSACTION STATE CLASSES --- */
 /* Classes to be used in Java Controller CellFactories */
 .text-deposit {
     -fx-text-fill: #00FF7F; /* Sea Green */
@@ -248,4 +335,37 @@
 .text-withdrawal {
     -fx-text-fill: #FF4500; /* Orange Red or Silver-Red */
     -fx-font-weight: bold;
+}
+
+.recent-debit {
+    -fx-text-fill: #ff0000 !important;
+    -fx-font-weight: bold;
+}
+
+.recent-credit {
+    -fx-text-fill: #00ff00 !important;
+    -fx-font-weight: bold;
+}
+
+
+/* --- MISC UI ELEMENTS --- */
+
+.progress-bar {
+    -fx-background-color: rgba(255, 255, 255, 0.1);
+    -fx-background-radius: 10;
+    -fx-padding: 2;
+}
+
+.progress-bar .bar {
+    -fx-background-radius: 10;
+}
+
+.progress-bar .track {
+    -fx-background-color: transparent;
+}
+
+/* Hides the numerical percentage in progress indicators for a cleaner look */
+.progress-indicator .percentage {
+    -fx-fill: transparent;
+    -fx-visibility: hidden;
 }
