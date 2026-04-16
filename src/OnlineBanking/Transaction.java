@@ -6,17 +6,14 @@ import java.time.LocalDateTime;
 /**
  * Represents a single financial event within a BankAccount.
  * This class captures the "who, what, when, and how much" of every account activity.
- * It implements Serializable to ensure transaction logs are saved permanently.
+ * Updated for MySQL compatibility by removing serialization.
  * 
  * @author: Gabriel Zayas
  * Date: 2/20/2026
- * @version 2.0
+ * @version 3.0
  * 
  */
-public class Transaction implements java.io.Serializable {
-    
-    /** Unique ID for serialization consistency. */
-    private static final long serialVersionUID = 1L;
+public class Transaction {
     
     /** The exact timestamp when the transaction occurred. */
     private final LocalDateTime date;
@@ -35,7 +32,8 @@ public class Transaction implements java.io.Serializable {
     
     /**
      * Constructs a new Transaction record with a timestamp generated at the moment of creation.
-     * * @param description A brief explanation of the transaction.
+     * 
+     * @param description A brief explanation of the transaction.
      * @param type The transaction category (Debit/Credit/Deposit).
      * @param amount The dollar amount involved.
      * @param note A custom memo or tag provided by the user.
@@ -48,21 +46,47 @@ public class Transaction implements java.io.Serializable {
         this.amount = amount;
         this.note = note;
     }
+    
+    /**
+     * Constructor used when LOADING existing transaction data from the MySQL database.
+     * 
+     * This constructor is specifically designed for the data retrieval layer (e.g., UserStore),
+     * allowing the application to preserve the original point-in-time timestamp generated 
+     * by the database rather than creating a new current timestamp.
+     * 
+     * @param date The specific LocalDateTime retrieved from the 'transaction_date' database column.
+     * @param description The descriptive label for the record (e.g., "Transfer to ACC-1234").
+     * @param type The category of the transaction (e.g., DEBIT, CREDIT, TRANSFER).
+     * @param amount The monetary value of the transaction.
+     * @param note The optional personalized memo or security note associated with the record.
+     */
+    public Transaction(LocalDateTime date, String description, String type, double amount, String note) {
+        this.date = date;
+        this.description = description;
+        this.type = type;
+        this.amount = amount;
+        this.note = note;
+    }
 
     // Getters (Required for TableView to display data)
     /** @return The date and time the transaction was processed. */
-    public LocalDateTime getDate() { return date; }
+    public LocalDateTime getDate() { 
+        return date; }
     
     /** @return The description of the transaction. */
-    public String getDescription() { return description; }
+    public String getDescription() { 
+        return description; }
     
     /** @return The type of transaction (e.g., "Debit" or "Credit"). */
-    public String getType() { return type; }
+    public String getType() { 
+        return type; }
     
     /** @return The monetary value of the transaction. */
-    public double getAmount() { return amount; }
+    public double getAmount() { 
+        return amount; }
     
     /** @return The personal note or category tag associated with the transaction. */
-    public String getNote() { return note; }
+    public String getNote() { 
+        return note; }
     
 }
