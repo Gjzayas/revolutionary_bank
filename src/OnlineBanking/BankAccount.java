@@ -12,13 +12,12 @@ import java.util.List;
  *
  * @author: Gabriel Zayas
  * Date: 2/20/2026
- * @version 2.0
+ * @version 3.0
  * 
  */
-public class BankAccount implements java.io.Serializable {
-    
-    /** Unique ID for serialization consistency. */
-    private static final long serialVersionUID = 1L;
+public class BankAccount {
+    // Database ID
+    private int id; 
     
     /** The unique identification number for this account. */
     private String accountNumber;
@@ -40,13 +39,16 @@ public class BankAccount implements java.io.Serializable {
     
     /**
      * Constructs a new BankAccount with an initial deposit and established security credentials.
-     * * @param accountNumber The unique string identifying the account.
+     * 
+     * @param id The database id for the user
+     * @param accountNumber The unique string identifying the account.
      * @param fullName The account holder's full name.
      * @param initialBalance The starting amount to be deposited upon creation.
      * @param question The chosen security question for the account.
      * @param answer The answer to the chosen security question.
      */
-    public BankAccount(String accountNumber, String fullName, double initialBalance, String question, String answer) {
+    public BankAccount(int id, String accountNumber, String fullName, double initialBalance, String question, String answer) {
+        this.id = id;
         this.accountNumber = accountNumber;
         this.fullName = fullName;
         this.balance = initialBalance;
@@ -54,85 +56,106 @@ public class BankAccount implements java.io.Serializable {
         this.securityAnswer = answer;
         this.transactionHistory = new ArrayList<>();
         
-        // Record the opening of the account as the first transaction
-        addTransaction("Initial Deposit", "Deposit", initialBalance, "Account Opening");
     }
 
     /**
      * Adds funds to the account balance and logs a "Personal Deposit" transaction.
-     * * @param amount The total value to be added to the balance. Must be positive.
+     * 
+     * @param amount The total value to be added to the balance. Must be positive.
      */
     public void deposit(double amount) {
         if (amount > 0) {
-            balance += amount;
-            addTransaction("Deposit to account", "Deposit", amount, "Personal Deposit");
+            this.balance += amount;
+            
+            // 1. Update the balance in MySQL
+            UserStore.updateBalance(this.accountNumber, this.balance);
+            
+            // 2. Add to database and update local UI list
+            Transaction t = new Transaction("Deposit to account", "Deposit", amount, "Personal Deposit");
+            UserStore.logTransaction(this.id, t);
+            this.transactionHistory.add(0, t); // Adds to top for UI
         }
     }
 
     /**
      * Deducts funds from the account balance if sufficient coverage exists.
-     * * @param amount The value to be removed from the account.
+     * 
+     * @param amount The value to be removed from the account.
      * @return true if the withdrawal was successful; false if funds were insufficient.
      */
     public boolean withdraw(double amount) {
         if (amount > 0 && balance >= amount) {
-            balance -= amount;
-            addTransaction("Withdrawal", "Debit", amount, "Cash Withdrawal");
+            this.balance -= amount;
+            
+            // 1. Update the balance in MySQL
+            UserStore.updateBalance(this.accountNumber, this.balance);
+            
+            // 2. Add to database and update local UI list
+            Transaction t = new Transaction("Withdrawal", "Debit", amount, "Cash Withdrawal");
+            UserStore.logTransaction(this.id, t);
+            this.transactionHistory.add(0, t); // Adds to top for UI
+            
             return true;
         }
-        return false; // Insufficient funds
+        return false;
     }
 
     /**
      * Executes a peer-to-peer money transfer using double-entry accounting.
      * This method deducts from the sender, credits the recipient, and logs the 
      * specified note for both parties.
-     * * @param recipientAccountNumber The account number of the person receiving funds.
+     * 
+     * @param recipientAccountNumber The account number of the person receiving funds.
      * @param amount The total value to transfer.
      * @param note A custom label or category (e.g., "Rent") for the transaction.
      * @return true if the transfer was completed; false if the recipient was not found or balance was low.
      */
     public boolean transfer(String recipientAccountNumber, double amount, String note) {
-        
         // 1. Basic checks
         if (amount <= 0 || this.balance < amount) return false;
         if (recipientAccountNumber.equals(this.accountNumber)) return false;
 
-        // 2. SEARCH for the recipient in our global UserStore
+        // 2. SEARCH for the recipient using your new DB-connected findAccountByNumber
         BankAccount recipient = UserStore.findAccountByNumber(recipientAccountNumber);
 
         if (recipient != null) {
-            // 3. Perform the double-entry accounting
-            this.balance -= amount;
-            recipient.setBalance(recipient.getBalance() + amount); 
+            // 3. Calculate new balances locally
+            double senderNewBalance = this.balance - amount;
+            double recipientNewBalance = recipient.getBalance() + amount;
 
-            // 4. Record history for BOTH users
-            
-            // Standardize the note if the user left it blank
-            String finalNote = (note == null || note.isEmpty()) ? "Standard Transaction" : note;
-            
-            // Record history for SENDER
-            this.addTransaction("Transfer to " + recipientAccountNumber, "Debit", amount, finalNote);
-            
-            // Record history for RECIPIENT
-            recipient.addTransaction("Transfer from " + this.accountNumber, "Credit", amount, finalNote);
+            // 4. Update the Database using a helper method (in UserStore)
+            // We use a single connection to ensure both updates succeed
+            boolean success = UserStore.executeTransfer(this.accountNumber, senderNewBalance, 
+                                                        recipientAccountNumber, recipientNewBalance);
 
-            // 5. Save the state to the file immediately
-            UserStore.saveData(); 
-            return true;
+            if (success) {
+                // Update local memory only after DB success
+                this.balance = senderNewBalance;
+                recipient.setBalance(recipientNewBalance);
+
+                // 5. Log history
+                String finalNote = (note == null || note.isEmpty()) ? "Standard Transaction" : note;
+                this.addTransaction("Transfer to " + recipientAccountNumber, "Debit", amount, finalNote);
+                recipient.addTransaction("Transfer from " + this.accountNumber, "Credit", amount, finalNote);
+
+                return true;
+            }
         }
-        return false; // Recipient not found
+        return false;
     }
     
     /**
      * Internal helper to append a new transaction to the account's history.
-     * * @param desc Description of the activity.
+     * 
+     * @param desc Description of the activity.
      * @param type The transaction type (e.g., Debit, Credit, Deposit).
      * @param amount The monetary value of the activity.
      * @param note A supplemental note or category.
      */
     private void addTransaction(String desc, String type, double amount, String note) {
-        transactionHistory.add(new Transaction(desc, type, amount, note));
+        Transaction t = new Transaction(desc, type, amount, note);
+        UserStore.logTransaction(this.id, t);
+        this.transactionHistory.add(0, t);
     }
 
     // Getters
@@ -154,11 +177,14 @@ public class BankAccount implements java.io.Serializable {
     /** @return The stored answer to the security question. */
     public String getSecurityAnswer() { return securityAnswer; }
     
+    public int getId() { return id; }
+    
     /**
     * Updates the current balance.
     * This is used during transfers to adjust the recipient's balance
     * without triggering an automatic "Deposit" transaction log.
-    * * @param balance The new balance value to set.
+    * 
+    * @param balance The new balance value to set.
     */
    public void setBalance(double balance) {
        this.balance = balance;
