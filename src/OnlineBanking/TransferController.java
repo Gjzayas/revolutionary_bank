@@ -19,7 +19,7 @@ import javafx.stage.Stage;
  * 
  * @author: Gabriel Zayas
  * Date: 2/20/2026
- * @version 2.0
+ * @version 3.0
  * 
  */
 public class TransferController {
@@ -27,7 +27,7 @@ public class TransferController {
     /** Input field for the recipient's unique account identification number. */
     @FXML private TextField recipientIdField;
     
-    /** Input field for the monetary value to be transferred. Supports commas and currency symbols. */
+    /** Input field for the monetary value. Sanitized via regex to support formatted strings. */
     @FXML private TextField amountField;
     
     /** Input field for an optional personalized note or category (e.g., "Rent", "Groceries"). */
@@ -36,11 +36,10 @@ public class TransferController {
     /** Label used to provide real-time feedback (Success/Error) to the user regarding the transfer. */
     @FXML private Label transferStatusLabel;
 
-    /** The injected BankAccount model representing the sender's account. */
+    /** The injected BankAccount instance belonging to the current session user. */
     private BankAccount account;
     
     /**
-     * Standard JavaFX initialization method.
      * Sets up a Focus Listener on the amountField to provide real-time 
      * currency formatting (e.g., converting "1200" to "$1,200.00") 
      * as soon as the user finishes typing.
@@ -54,12 +53,47 @@ public class TransferController {
                 formatTransferAmount();
             }
         });
+        
+        // Group fields for automated listener attachment
+        TextField[] fields = {recipientIdField, amountField, noteField};
+
+        // LOOP: Attach a focus listener to each input field to manage the status label visibility.
+        for (TextField field : fields) {
+            field.focusedProperty().addListener((obs, wasFocused, isNowFocused) -> {
+                
+                // DECISION: Only trigger logic when the user enters (focuses) a field. 
+                if (isNowFocused) {
+                    String currentMsg = transferStatusLabel.getText();
+                    
+                    // GUARD: If there is no message currently displayed, there is nothing to clear.
+                    if (currentMsg == null || currentMsg.isEmpty()) 
+                        return;
+
+                    // Identify the current type of message based on its display color.
+                    Color currentColor = (Color) transferStatusLabel.getTextFill();
+
+                    // 1. If it's an ERROR (Red), clear it immediately when the user click back
+                    if (currentColor.equals(Color.RED)) {
+                        transferStatusLabel.setText("");
+                    } 
+                    // 2. If it's SUCCESS (Green), only clear it if the user is starting a new entry
+                    else if (currentColor.equals(Color.GREEN)) {
+                        if (field.getText().isEmpty()) {
+                            transferStatusLabel.setText("");
+                        }
+                    }
+                }
+            });
+        }
     }
     
     /**
-     * Helper method to clean and re-format the amount input field.
-     * Uses String.format to provide a professional banking aesthetic 
-     * while the user is still on the screen.
+     * Re-formats the raw numerical input into a standard currency string.
+     * 
+     * LOGIC:
+     * - Uses '.replaceAll("[,\\$]", "")' to strip existing formatting characters.
+     * - Applies 'String.format("$%,.2f", value)' to add comma separators and 
+     * two decimal places.
      */
     private void formatTransferAmount() {
         String input = amountField.getText().trim();
@@ -67,19 +101,18 @@ public class TransferController {
         if (input.isEmpty()) return;
 
         try {
-            // 1. Strip any existing symbols to prevent errors
+            // Strip any existing symbols to prevent errors
             String cleanInput = input.replaceAll("[,\\$]", "");
             double value = Double.parseDouble(cleanInput);
 
-            // 2. Format with dollar sign, thousands separator, and 2 decimal places
+            // Format with dollar sign, thousands separator, and 2 decimal places
             String formatted = String.format("$%,.2f", value);
             
-            // 3. Update the UI field
+            // Update the UI field
             amountField.setText(formatted);
             
         } catch (NumberFormatException e) {
-            // Silence errors here so the user can still edit the field 
-            // handleTransfer() will show the formal error message if the user clicks 'Transfer'
+            // Silently fail to allow handleTransfer() to provide the formal error message.
         }
     }
 
@@ -87,22 +120,25 @@ public class TransferController {
      * Injects the authenticated user's account into this controller.
      * This method is called by the DashboardController during navigation to ensure 
      * the transfer is debited from the correct source.
-     * * @param account The BankAccount instance belonging to the current user.
+     * 
+     * @param account The BankAccount instance belonging to the current user.
      */
     public void setAccount(BankAccount account) {
         this.account = account;
     }
 
     /**
-     * Orchestrates the transfer process by validating inputs, sanitizing currency 
-     * strings, and communicating with the BankAccount model to execute the transaction.
-     * * This method implements robust input handling by stripping non-numeric 
-     * characters (like commas and dollar signs) to prevent parsing errors.
+     * Orchestrates the transfer workflow through validation, confirmation, and execution.
      * 
-     * * * Updates: Added explicit verification for recipient existence to provide 
-     * more accurate error feedback to the user.
-     * 
-     * * Updates: Added a Confirmation Alert dialog to prevent accidental transactions.
+     * * LOGIC & DECISIONS:
+     * 1. EMPTY CHECK: Prevents processing if mandatory fields are blank.
+     * 2. SANITIZATION: Removes currency symbols to avoid Double.parseDouble() crashes.
+     * 3. LOGIC VALIDATION: Checks for positive amounts and prevents self-transfers.
+     * 4. RECIPIENT VERIFICATION: Calls UserStore to ensure the target account is valid.
+     * 5. CONFIRMATION DIALOG: Interrupts the workflow to ensure the user intended the transfer.
+     * 6. BRANDING: Injects the "Rev_Logo" into the alert window for a professional feel.
+     * 7. REFRESH: If successful, it re-fetches the balance from the database to 
+     * ensure local consistency.
      */
     @FXML
     private void handleTransfer() {
@@ -179,9 +215,17 @@ public class TransferController {
                 boolean success = account.transfer(recipient, amount, note);
 
                 if (success) {
-                    setStatus("Transfer Successful!\nNew Balance: $" + String.format("%,.2f", account.getBalance()), Color.GREEN);
+                    // REFRESH: Fetch the latest data from DB to ensure our local object 
+                    // matches the updated balance in MySQL
+                    BankAccount updatedAccount = UserStore.findAccountByNumber(account.getAccountNumber());
+                    if (updatedAccount != null) {
+                        this.account.setBalance(updatedAccount.getBalance());
+                    }
+
+                    // Update UI with the fresh balance from the database
+                    setStatus("Transfer Successful!\nNew Balance: $" + String.format("%,.2f", account.getBalance()), Color.web("#00FF7F"));
                     clearFields();
-                    if (noteField != null) noteField.clear();
+                
                 } else {
                     setStatus("Insufficient funds for this transfer.", Color.RED);
                 }
@@ -198,7 +242,8 @@ public class TransferController {
 
     /**
      * Updates the status label with a specific message and color.
-     * * @param message The text to display to the user.
+     * 
+     * @param message The text to display to the user.
      * @param color The Color (e.g., RED for errors, GREEN for success) to apply to the text.
      */
     private void setStatus(String message, Color color) {
@@ -212,5 +257,6 @@ public class TransferController {
     private void clearFields() {
         recipientIdField.clear();
         amountField.clear();
+        noteField.clear();
     }
 }
