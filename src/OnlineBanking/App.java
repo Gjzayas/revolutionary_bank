@@ -14,7 +14,7 @@ import javafx.stage.Stage;
  * 
  * @author: Gabriel Zayas
  * Date: 2/20/2026
- * @version 2.0
+ * @version 3.0
  * 
  */
 public class App extends Application {
@@ -40,7 +40,7 @@ public class App extends Application {
             // 3. Configure the Primary Stage
             // We set the window title and disable resizability to ensure the 
             // banking UI maintains its professional, intended layout.
-            primaryStage.setTitle("Revolutionary Banking System - Login");
+            primaryStage.setTitle("Revolutionary Banking - Login");
             primaryStage.setResizable(false);
             
             // Add bank logo to the window's icon
