@@ -5,17 +5,19 @@
 <?import javafx.scene.control.Hyperlink?>
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.control.PasswordField?>
+<?import javafx.scene.control.ProgressBar?>
 <?import javafx.scene.control.TextField?>
 <?import javafx.scene.image.Image?>
 <?import javafx.scene.image.ImageView?>
 <?import javafx.scene.layout.AnchorPane?>
 <?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.StackPane?>
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.text.Font?>
 
-<AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="600.0" prefWidth="600.0" styleClass="login-root" stylesheets="@../style/style.css" xmlns="http://javafx.com/javafx/23.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="OnlineBanking.SignupController">
+<AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="725.0" prefWidth="600.0" styleClass="login-root" stylesheets="@../style/style.css" xmlns="http://javafx.com/javafx/23.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="OnlineBanking.SignupController">
    <children>
-      <VBox alignment="CENTER" layoutX="155.0" layoutY="158.0" prefHeight="400.0" prefWidth="300.0" spacing="10.0">
+      <VBox alignment="CENTER" layoutX="155.0" layoutY="130.0" prefWidth="300.0" spacing="15.0" AnchorPane.topAnchor="150.0">
          <padding>
             <Insets bottom="20.0" left="20.0" right="20.0" top="20.0" />
          </padding>
@@ -30,14 +32,51 @@
             </Label>
             <TextField fx:id="fullNameField" promptText="Full Name" styleClass="navy-input" />
             <TextField fx:id="usernameField" promptText="Choose Username" styleClass="navy-input" />
-            <PasswordField fx:id="passwordField" promptText="Choose Password" styleClass="navy-input" />
-            <PasswordField fx:id="confirmPasswordField" promptText="Confirm Password" styleClass="navy-input" />
+            <StackPane alignment="CENTER_RIGHT" maxWidth="300.0">
+                <PasswordField fx:id="passwordField" promptText="Choose Password" styleClass="navy-input" />
+                <TextField fx:id="visiblePasswordField" managed="false" promptText="Choose Password" styleClass="navy-input" visible="false" />
+                <Button fx:id="toggleBtn1" onAction="#handleTogglePassword1" styleClass="icon-button">
+                    <graphic>
+                    <ImageView fitHeight="16" fitWidth="22">
+                        <image>
+                            <Image url="@images/eye_open.png" />
+                        </image>
+                    </ImageView>
+                    </graphic>
+                    <StackPane.margin>
+                        <javafx.geometry.Insets right="5.0" />
+                    </StackPane.margin>
+                </Button>
+            </StackPane>
+
+            <StackPane alignment="CENTER_RIGHT" maxWidth="300.0">
+                <PasswordField fx:id="confirmPasswordField" promptText="Confirm Password" styleClass="navy-input" />
+                <TextField fx:id="visibleConfirmField" managed="false" promptText="Confirm Password" styleClass="navy-input" visible="false" />
+                <Button fx:id="toggleBtn2" onAction="#handleTogglePassword2" styleClass="icon-button">
+                    <graphic>
+                    <ImageView fitHeight="16" fitWidth="22">
+                        <image>
+                            <Image url="@images/eye_open.png" />
+                        </image>
+                    </ImageView>
+                    </graphic>
+                    <StackPane.margin>
+                        <javafx.geometry.Insets right="5.0" />
+                    </StackPane.margin>
+                </Button>
+            </StackPane>
+            <VBox alignment="CENTER" prefHeight="35.0" prefWidth="100.0" spacing="5.0">
+               <children>
+                  <ProgressBar fx:id="strengthBar" prefHeight="15.0" prefWidth="250.0" progress="0.0" />
+                  <Label fx:id="strengthLabel" text="Password Strength: Weak" textFill="SILVER" />
+               </children>
+            </VBox>
             <TextField fx:id="questionField" promptText="Security Question" styleClass="navy-input" />
             <TextField fx:id="answerField" promptText="Security Answer" styleClass="navy-input" />
             <TextField fx:id="initialDepositField" promptText="Initial Deposit ($)" styleClass="navy-input" />
             <Button fx:id="createAccountButton" mnemonicParsing="false" onAction="#handleSignup" styleClass="silver-button" text="Register" />
             <Hyperlink onAction="#handleBackToLogin" styleClass="silver-outline-button" text="Back to Login" />
-            <Label fx:id="messageLabel" textFill="#d41818" />
+            <Label fx:id="messageLabel" alignment="CENTER" maxWidth="1.7976931348623157E308" minHeight="-Infinity" textFill="#d41818" wrapText="true" />
          </children>
       </VBox>
       <HBox layoutX="200.0" prefHeight="100.0" prefWidth="200.0">
