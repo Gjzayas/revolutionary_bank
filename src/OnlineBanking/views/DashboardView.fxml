@@ -20,6 +20,7 @@
          </padding>
          <children>
             <Button fx:id="homeBtn" mnemonicParsing="false" onAction="#showOverview" styleClass="nav-button" text="Overview" />
+            <Button fx:id="profileBtn" mnemonicParsing="false" onAction="#showProfile" styleClass="nav-button" text="My Profile" />
             <Button fx:id="transferBtn" mnemonicParsing="false" onAction="#showTransfer" styleClass="nav-button" text="Transfer" />
             <Button fx:id="historyBtn" mnemonicParsing="false" onAction="#showHistory" styleClass="nav-button" text="Transactions" />
             <Button fx:id="logoutButton" mnemonicParsing="false" onAction="#handleLogout" styleClass="nav-button" text="Logout" />
