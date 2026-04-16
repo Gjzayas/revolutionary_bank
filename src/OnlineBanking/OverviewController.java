@@ -12,7 +12,7 @@ import javafx.scene.control.Label;
  * 
  * @author: Gabriel Zayas
  * Date: 2/20/2026
- * @version 2.0
+ * @version 3.0
  * 
  */
 public class OverviewController {
@@ -38,7 +38,8 @@ public class OverviewController {
     /**
      * Injects the authenticated user's account into this controller and updates the UI.
      * This method is called by the DashboardController's loadPage utility.
-     * * @param account The BankAccount instance belonging to the current user.
+     * 
+     * @param account The BankAccount instance belonging to the current user.
      */
     public void setAccount(BankAccount account) {
         this.account = account;
@@ -75,6 +76,10 @@ public class OverviewController {
                 // Default state if no account data is injected
                 balanceLabel.setText("$0.00");
                 balanceLabel.setStyle("-fx-text-fill: black;"); // Reset color if no account
+                
+                if (accountNumberLabel != null) {
+                    accountNumberLabel.setText("Account: N/A");
+                }
             }   
         }
     }
