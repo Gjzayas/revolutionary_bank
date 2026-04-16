@@ -13,6 +13,7 @@ import javafx.stage.Stage;
 import java.io.File;
 import java.io.PrintWriter;
 import java.time.format.DateTimeFormatter;
+import java.util.List;
 import javafx.scene.control.TableCell;
 
 /**
@@ -23,7 +24,7 @@ import javafx.scene.control.TableCell;
  * 
  * @author: Gabriel Zayas
  * Date: 2/20/2026
- * @version 2.0
+ * @version 3.0
  * 
  */
 public class HistoryController {
@@ -51,23 +52,31 @@ public class HistoryController {
 
     /**
      * Injects the authenticated user's account and initializes the table configuration.
-     * * @param account The BankAccount instance belonging to the current user.
+     * 
+     * @param account The BankAccount instance belonging to the current user.
      */
     public void setAccount(BankAccount account) {
         this.account = account;
+        
+        // 1. Fetch the absolute latest from MySQL
+        List<Transaction> freshHistory = UserStore.loadTransactionHistory(account.getId());
+
+        // 2. Clear the old account history list and update it with the fresh data
+        account.getTransactionHistory().clear();
+        account.getTransactionHistory().addAll(freshHistory);
+
+        // 3. Configure the table with the refreshed list
         setupTable();
     }
 
     /**
      * Configures the TableView columns, including data binding, currency formatting, 
      * and conditional CSS styling for financial entries.
-     * * This method uses custom CellFactories to ensure dates look human-readable 
+     * 
+     * This method uses custom CellFactories to ensure dates look human-readable 
      * and that Debits appear in red (#e74c3c) while Credits appear in green (#27ae60).
      */
     private void setupTable() {
-        
-        DateTimeFormatter myFormat = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
-        
         // Set up the cell factory for the Date column
         colDate.setCellValueFactory(new PropertyValueFactory<>("date"));
         
@@ -87,16 +96,20 @@ public class HistoryController {
             }
         });
         
+        // Create the bank-standard formatter
+        DateTimeFormatter bankFormatter = DateTimeFormatter.ofPattern("MMM dd, yyyy");
+        
         // Custom CellFactory for Date formatting
         colDate.setCellFactory(column -> new TableCell<Transaction, LocalDateTime>() {
         @Override
         protected void updateItem(LocalDateTime item, boolean empty) {
             super.updateItem(item, empty);
+            
             if (empty || item == null) {
                 setText(null);
             } else {
-                // This converts the long timestamp into your clean format
-                setText(item.format(myFormat));
+                // This converts the long timestamp into your clean format "Mar 12, 2026" style
+                setText(item.format(bankFormatter));
             }
         }
         });
@@ -110,21 +123,36 @@ public class HistoryController {
             @Override
             protected void updateItem(Double amount, boolean empty) {
                 super.updateItem(amount, empty);
+                
+                // Reset styles and text
+                setStyle("");
+                
+                // Clear previous styles to prevent "ghosting" when scrolling
+                getStyleClass().removeAll("recent-debit", "recent-credit", "text-deposit", "text-withdrawal");
+                
                 if (empty || amount == null) {
                     setText(null);
+                
                 } else {
                     // Format the number as currency (e.g., $5,000.00)
                     setText(String.format("$%,.2f", amount));
 
-                    // Semantic color-coding: Red for Debits, Green for Credits/Deposits
-                    if (getTableRow() != null && getTableRow().getItem() != null) {
-                        String type = getTableRow().getItem().getType();
-                        if ("Debit".equalsIgnoreCase(type)) {
-                            setStyle("-fx-text-fill: #e74c3c; -fx-font-weight: bold;");
-                        } else if ("Credit".equalsIgnoreCase(type) || "Deposit".equalsIgnoreCase(type)) {
-                            setStyle("-fx-text-fill: #27ae60; -fx-font-weight: bold;");
-                        }
-                    }
+                    // 1. Get the transaction type from the current row
+                    Transaction t = getTableView().getItems().get(getIndex());
+                    String type = t.getType(); // "Debit", "Credit", "DEPOSIT"
+                    
+                    // 2. Check if this is the very first row (the most recent)
+                    boolean isMostRecent = (getIndex() == 0);
+
+                    // 3. Apply color based on type
+                    if ("Debit".equalsIgnoreCase(type)) {
+                        String color = isMostRecent ? "#ff0000" : "#FF4500";
+                        setStyle("-fx-text-fill: " + color + "; -fx-font-weight: bold;");
+                    
+                    } else if ("Credit".equalsIgnoreCase(type) || "DEPOSIT".equalsIgnoreCase(type)) {
+                        String color = isMostRecent ? "#00ff00" : "#00FF7F";
+                        setStyle("-fx-text-fill: " + color + "; -fx-font-weight: bold;");
+                    } 
                 }
             }
         });
@@ -161,7 +189,8 @@ public class HistoryController {
     /**
      * Writes the transaction history to a text file using professional spacing 
      * and formatting.
-     * * @param file The file destination selected by the user.
+     * 
+     * @param file The file destination selected by the user.
      */
     private void saveToFile(File file) {
         try (PrintWriter writer = new PrintWriter(file)) {
