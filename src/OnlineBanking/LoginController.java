@@ -10,18 +10,27 @@ import javafx.fxml.FXMLLoader;
 import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
+import javafx.scene.control.Button;
 import javafx.scene.control.PasswordField;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
 import javafx.stage.Stage;
+import java.util.prefs.Preferences; 
+import javafx.scene.control.CheckBox;
 
 /**
  * Controller for the primary Login interface of the Revolutionary Banking app.
- * This class handles user authentication, facilitates the transition to the 
- * dashboard upon successful login, and manages navigation to account recovery 
- * and registration views.
- * * 
- * @author: Gabriel Zayas
- * Date: 2/20/2026
- * @version 2.0
+ * This class handles user authentication via MySQL, manages "Remember Me" 
+ * preferences, and facilitates scene transitions to the dashboard or recovery views.
+ * 
+ * VERSION HISTORY:
+ * 1.0 - Initial GUI.
+ * 2.0 - Local Serialization support.
+ * 3.0 - MySQL Authentication and password visibility toggling.
+ * 
+ * @author: Gabriel J. Zayas
+ * Date: 4/06/2026
+ * @version 3.0
  * 
  */
 public class LoginController {
@@ -33,44 +42,110 @@ public class LoginController {
     /** Secure input field for the user's password, masking sensitive characters. */
     @FXML
     private PasswordField passwordField;
-
+    
     /** Label used to display descriptive error messages for failed login attempts or system issues. */
-    @FXML
-    private Label errorLabel;
+    @FXML private Label errorLabel;
+    
+    /** Secondary text field used to show the password in plain text when toggled. */
+    @FXML private TextField visiblePasswordField;
+    
+    /** Button that triggers the password visibility toggle. */
+    @FXML private Button toggleBtn;
+    
+    /** Checkbox to save the username locally using Java Preferences API. */
+    @FXML private CheckBox rememberMeCheckbox;
+    
+    /** The main login submission button. */
+    @FXML private Button loginButton;
+    
+    /** Image representing the "Show Password" state. */
+    private Image openEye;
+    
+    /** Image representing the "Hide Password" state. */
+    private Image closedEye;
+    
+    /** Preferences node used to store the 'Remember Me' username on the local machine. */
+    private final Preferences prefs = Preferences.userNodeForPackage(LoginController.class);
+    
+    /** Constant key for the remembered username preference. */
+    private static final String REMEMBERED_USER = "remembered_username";
 
     /**
-     * Processes the login request by validating credentials against the UserStore.
-     * If authenticated, it performs Dependency Injection by passing the BankAccount 
-     * object to the DashboardController before switching the scene.
-     * * @param event The ActionEvent triggered by the "Login" button.
+     * Initializes the controller class. 
+     * Loads UI icons, attaches error-clearing listeners to input fields, 
+     * and auto-fills the username if the 'Remember Me' preference is set.
+     */
+    @FXML
+    public void initialize() {
+        // Load the images from the images resource folder
+        openEye = new Image(getClass().getResource("images/eye_open.png").toExternalForm());
+        closedEye = new Image(getClass().getResource("images/eye_shut.png").toExternalForm());
+        
+        // Set the initial icon (Open Eye)
+        ImageView iconView = (ImageView) toggleBtn.getGraphic();
+        iconView.setImage(openEye);
+        
+        // Error Clearing Listeners
+        // Attach listeners to clear error messages as soon as the user interacts with any fields
+        usernameField.textProperty().addListener((obs, old, newValue) -> errorLabel.setText(""));
+        passwordField.textProperty().addListener((obs, old, newValue) -> errorLabel.setText(""));
+        visiblePasswordField.textProperty().addListener((obs, old, newValue) -> errorLabel.setText(""));
+        
+        // Check for a previously saved username
+        String savedUser = prefs.get(REMEMBERED_USER, "");
+        if (!savedUser.isEmpty()) {
+            usernameField.setText(savedUser);
+            rememberMeCheckbox.setSelected(true);
+            
+            // Redirect focus to the Login button so the username field isn't highlighted in blue
+            javafx.application.Platform.runLater(() -> {
+                loginButton.requestFocus(); 
+            });
+        }
+    }
+
+    /**
+     * Processes the login request by validating credentials against the database.
+     * If authenticated, it injects the BankAccount model into the DashboardController 
+     * and transitions the scene.
+     * 
+     * @param event The ActionEvent triggered by clicking the Login button.
      */
     @FXML
     public void handleLogin(ActionEvent event) {
-        // Basic Validation: Ensure input isn't just whitespace
+        // Extract and clean user input
         String username = usernameField.getText().trim();
-        String password = passwordField.getText();
+        String password = passwordField.isVisible() ? passwordField.getText() : visiblePasswordField.getText();
         
-        // Consult the global UserStore for credential verification
+        // Authenticate via the MySQL UserStore
         BankAccount authenticatedAccount = UserStore.authenticate(username, password);
 
         if (authenticatedAccount != null) {
+            // Update 'Remember Me' preferences based on checkbox state
+            if (rememberMeCheckbox.isSelected()) {
+                prefs.put(REMEMBERED_USER, username);
+            
+            } else {
+                prefs.remove(REMEMBERED_USER); // Clear if unchecked
+            }
+            
             try {
-                // 1. Prepare the FXMLLoader for the Dashboard view
+                // Load the Dashboard FXML
                 FXMLLoader loader = new FXMLLoader(getClass().getResource("views/DashboardView.fxml"));
                 Parent dashboardRoot = loader.load();
 
-                // 2. DEPENDENCY INJECTION: Retrieve the Dashboard's controller instance
+                // Inject the authenticated model into the DashboardController
                 DashboardController dashController = loader.getController();
 
-                // 3. Pass the authenticated model to the next view before it displays
+                // Pass the authenticated model to the next view before it displays
                 dashController.setUserAccount(authenticatedAccount);
 
-                // 4. Handle stage transition and window centering
+                // Finalize the stage transition and window centering
                 Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
                 Scene scene = new Scene(dashboardRoot);
                 stage.setScene(scene);
                 stage.setTitle("Revolutionary Banking - Dashboard");
-                stage.centerOnScreen(); // Nice touch for UX
+                stage.centerOnScreen(); 
                 stage.show();
 
             } catch (IOException e) {
@@ -84,41 +159,96 @@ public class LoginController {
     
     /**
      * Navigates the user to the Signup/Registration view.
-     * * @param event The ActionEvent triggered by the "Sign Up" button.
+     * 
+     * @param event The ActionEvent triggered by the "Sign Up" button.
      * @throws IOException If the SignupView.fxml file cannot be found or loaded.
      */
     @FXML
     private void handleShowSignup(ActionEvent event) throws IOException {
+        // Load the SignupView FXML
         Parent root = FXMLLoader.load(getClass().getResource("views/SignupView.fxml"));
+        
+        // Retrieve the current Stage
         Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
+        
+        // Set the new Scene
         stage.setScene(new Scene(root));
+        
+        // Update Title and Center window
+        stage.setTitle("Revolutionary Banking - Create New Account");
+        stage.centerOnScreen(); 
+
         stage.show();
     }
     
     /**
      * Navigates the user to the Reset Password/Security Question view.
-     * This method resets the window focus and centers the stage for optimal UX.
-     * * @param event The ActionEvent triggered by the "Forgot Password" link.
+     * 
+     * @param event The ActionEvent triggered by the "Forgot Password" link.
      */
     @FXML
     private void handleForgotPassword(ActionEvent event) {
         try {
-            // 1. Load the new ResetPasswordView.fxml
+            // Load the new ResetPasswordView.fxml
             Parent resetRoot = FXMLLoader.load(getClass().getResource("views/ResetPasswordView.fxml"));
 
-            // 2. Get the current Stage from the event source
+            // Get the current Stage from the event source
             Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
 
-            // 3. Update the stage with the new scene
+            // Update the stage with the new scene
             stage.setScene(new Scene(resetRoot));
+            stage.setTitle("Revolutionary Banking - Forgot Password");
 
-            // 4. Center the window on the monitor
+            // Center the window on the monitor
             stage.centerOnScreen();
             stage.show();
             
         } catch (IOException e) {
             System.err.println("Error loading ResetPasswordView: " + e.getMessage());
             e.printStackTrace();
+        }
+    }
+    
+    /**
+     * Toggles between masked (PasswordField) and plain-text (TextField) views.
+     * Synchronizes the text between both fields and swaps the eye icon.
+     */
+    @FXML
+    public void handleTogglePassword() {
+        ImageView iconView = (ImageView) toggleBtn.getGraphic();
+        boolean isVisible = visiblePasswordField.isVisible();
+
+        if (!isVisible) {
+            // Logic to switch from Hidden -> Visible
+            visiblePasswordField.setText(passwordField.getText());
+            visiblePasswordField.setVisible(true);
+            visiblePasswordField.setManaged(true);
+            
+            passwordField.setVisible(false);
+            passwordField.setManaged(false);
+            
+            iconView.setImage(closedEye); // Show "Hide" icon
+            
+            // FOCUS: Return cursor to the visible text field
+            visiblePasswordField.requestFocus();
+            // Move cursor to the end of the text
+            visiblePasswordField.positionCaret(visiblePasswordField.getText().length());
+        
+        } else {
+            // Logic to switch from Visible -> Hidden
+            passwordField.setText(visiblePasswordField.getText());
+            passwordField.setVisible(true);
+            passwordField.setManaged(true);
+            
+            visiblePasswordField.setVisible(false);
+            visiblePasswordField.setManaged(false);
+            
+            iconView.setImage(openEye); // Show "Show" icon
+            
+            // FOCUS: Return cursor to the masked password field
+            passwordField.requestFocus();
+            // Move cursor to the end of the text
+            passwordField.positionCaret(passwordField.getText().length());
         }
     }
     
