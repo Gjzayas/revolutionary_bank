@@ -35,6 +35,8 @@ import javafx.scene.control.CheckBox;
  */
 public class LoginController {
     
+    // --- UI Fields ---
+    
     /** Input field for the user's account number or username. */
     @FXML
     private TextField usernameField; 
@@ -57,6 +59,8 @@ public class LoginController {
     
     /** The main login submission button. */
     @FXML private Button loginButton;
+
+    // --- State Variables ---
     
     /** Image representing the "Show Password" state. */
     private Image openEye;
@@ -97,9 +101,9 @@ public class LoginController {
             usernameField.setText(savedUser);
             rememberMeCheckbox.setSelected(true);
             
-            // Redirect focus to the Login button so the username field isn't highlighted in blue
+            // Redirect focus to the password field so the username field isn't highlighted in blue
             javafx.application.Platform.runLater(() -> {
-                loginButton.requestFocus(); 
+                passwordField.requestFocus(); 
             });
         }
     }
