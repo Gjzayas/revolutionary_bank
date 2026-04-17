@@ -108,7 +108,7 @@ public class HistoryController {
             if (empty || item == null) {
                 setText(null);
             } else {
-                // This converts the long timestamp into your clean format "Mar 12, 2026" style
+                // This converts the long timestamp into a clean format "Mar 12, 2026" style
                 setText(item.format(bankFormatter));
             }
         }
