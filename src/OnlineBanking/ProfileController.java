@@ -178,6 +178,38 @@ public class ProfileController {
     }
 
     /**
+     * Compares the text in the "New Password" and "Confirm Password" fields 
+     * and updates the UI indicator to reflect whether they match.
+     */
+    private void updateMatchStatus() {
+        // Determine the "New" and "Confirm" values based on visibility
+        String newPass = newPassField.isVisible() ? newPassField.getText() : visibleNewPass.getText();
+        String confirm = confirmPassField.isVisible() ? confirmPassField.getText() : visibleConfirmPass.getText();
+
+        // DECISION: If the confirm field is cleared out, reset the indicator
+        if (confirm.isEmpty()) {
+            resetStrengthIndicator(); // Keeps it at "Confirming..." if they backspace everything
+            return;
+        }
+
+        // DECISION: Check for exact string match
+        if (newPass.equals(confirm)) {
+            // SUCCESS
+            strengthIndicator.setProgress(1.0);
+            strengthIndicator.setStyle("-fx-progress-color: #00FF7F;");
+            strengthLabel.setText("Passwords Match!");
+            strengthLabel.setTextFill(Color.web("#00FF7F"));
+        
+        } else {
+            // PENDING/MISMATCH
+            strengthIndicator.setProgress(0.5);
+            strengthIndicator.setStyle("-fx-progress-color: orange;");
+            strengthLabel.setText("Passwords do not match yet...");
+            strengthLabel.setTextFill(Color.ORANGE);
+        }
+    }
+
+    /**
     * Helper method to swap between masked and plain-text CURRENT password fields.
     */
     @FXML 
@@ -297,7 +329,7 @@ public class ProfileController {
      */
     @FXML
     public void handleUpdateSecurity() {
-        // Acquire Security qeustion and answer from the user
+        // Acquire Security question and answer from the user
         String q = questionField.getText().trim();
         String a = answerField.getText().trim().toLowerCase();
         
@@ -361,7 +393,7 @@ public class ProfileController {
         if (UserStore.verifyPassword(currentUserId, current)) {
             
             // SECURITY DECISION: Hash the validated plain-text password before database entry.
-            // We use the SHA-256 utility to ensure no plain-text passwords exist in MySQL.
+            // Use the SHA-256 utility to ensure no plain-text passwords exist in MySQL.
             String hashedNewPassword = PasswordUtil.hashPassword(newPass);
 
             // Final Step: Execute the database update
@@ -431,8 +463,8 @@ public class ProfileController {
 
         // Attempt to load the application icon into the alert window
         try {
-            // Use the relative path to your resized logo
             var iconStream = getClass().getResourceAsStream("/OnlineBanking/images/Rev_Logo_resize2.png");
+            
             if (iconStream != null) {
                 Image brandIcon = new Image(iconStream, 64, 64, true, true);
                 alertStage.getIcons().clear();
@@ -464,37 +496,5 @@ public class ProfileController {
         strengthIndicator.setStyle("-fx-progress-color: gray;");
         strengthLabel.setText("Confirming New Password...");
         strengthLabel.setTextFill(Color.SILVER);
-    }
-   
-    /**
-     * Compares the text in the "New Password" and "Confirm Password" fields 
-     * and updates the UI indicator to reflect whether they match.
-     */
-    private void updateMatchStatus() {
-        // Determine the "New" and "Confirm" values based on visibility
-        String newPass = newPassField.isVisible() ? newPassField.getText() : visibleNewPass.getText();
-        String confirm = confirmPassField.isVisible() ? confirmPassField.getText() : visibleConfirmPass.getText();
-
-        // DECISION: If the confirm field is cleared out, reset the indicator
-        if (confirm.isEmpty()) {
-            resetStrengthIndicator(); // Keeps it at "Confirming..." if they backspace everything
-            return;
-        }
-
-        // DECISION: Check for exact string match
-        if (newPass.equals(confirm)) {
-            // SUCCESS
-            strengthIndicator.setProgress(1.0);
-            strengthIndicator.setStyle("-fx-progress-color: #00FF7F;"); // Your Sea Green
-            strengthLabel.setText("Passwords Match!");
-            strengthLabel.setTextFill(Color.web("#00FF7F"));
-        
-        } else {
-            // PENDING/MISMATCH
-            strengthIndicator.setProgress(0.5);
-            strengthIndicator.setStyle("-fx-progress-color: orange;");
-            strengthLabel.setText("Passwords do not match yet...");
-            strengthLabel.setTextFill(Color.ORANGE);
-        }
     }
 }
