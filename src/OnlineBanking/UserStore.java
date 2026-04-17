@@ -18,7 +18,7 @@ import java.util.UUID;
  * 
  * 
  * @author Gabriel J. Zayas
- * Date: 4/07/2026
+ * Date: 4/17/2026
  * @version 3.0
  * 
  */
@@ -27,7 +27,8 @@ public class UserStore {
     /**
      * Registers a new user in the MySQL database.
      * 
-     * * LOGIC & DECISIONS:
+     * 
+     * LOGIC & DECISIONS:
      * 1. Uses a PreparedStatement to prevent SQL Injection.
      * 2. Requests 'RETURN_GENERATED_KEYS' to retrieve the auto-incremented Primary Key.
      * 3. DECISION: If 'affectedRows' is 0, the insertion failed (e.g., connection drop), 
@@ -88,7 +89,8 @@ public class UserStore {
     /**
      * Authenticates a user by matching hashed credentials against the database.
      * 
-     * * VARIABLES & LOGIC:
+     * 
+     * VARIABLES & LOGIC:
      * - 'hashedPassword': The user's input is immediately hashed to match stored values.
      * - 'ResultSet rs': Holds the row data if a match is found.
      * - DECISION: If rs.next() is true, a new BankAccount object is instantiated 
@@ -113,7 +115,6 @@ public class UserStore {
 
            try (ResultSet rs = pstmt.executeQuery()) {
                if (rs.next()) {
-                   // Map the database columns to the BankAccount constructor
                    return new BankAccount(
                        rs.getInt("id"),
                        rs.getString("account_number"),
@@ -133,6 +134,7 @@ public class UserStore {
 
     /**
      * Checks if a username already exists to prevent duplicate registrations.
+     *
      * @param username The identifier to verify.
      * @return true if the username is found (case-insensitive).
      */
@@ -191,6 +193,7 @@ public class UserStore {
     
     /**
      * Updates the password hash for a user.
+     *
      * @param username The user's login name.
      * @param hashedPassword The pre-hashed new password string.
      */
@@ -269,7 +272,8 @@ public class UserStore {
 
     /**
      * Updates the balance of a single user account in the database.
-     * * LOGIC & DECISION:
+     * 
+     * LOGIC & DECISION:
      * - Uses a PreparedStatement to securely map the new numerical balance to the 
      * unique account number string.
      * - This method is typically called for non-transfer actions, such as 
@@ -280,11 +284,14 @@ public class UserStore {
      */
     public static void updateBalance(String accountNumber, double newBalance) {
         String query = "UPDATE users SET balance = ? WHERE account_number = ?";
+        
         try (Connection conn = DatabaseConnection.getConnection();
              PreparedStatement pstmt = conn.prepareStatement(query)) {
+            
             pstmt.setDouble(1, newBalance);
             pstmt.setString(2, accountNumber);
             pstmt.executeUpdate();
+        
         } catch (SQLException e) {
             e.printStackTrace();
         }
@@ -292,7 +299,8 @@ public class UserStore {
     
     /**
      * Executes a secure, atomic P2P (Peer-to-Peer) transfer between two users.
-     * * TRANSACTION LOGIC (ACID Compliance):
+     * 
+     * TRANSACTION LOGIC (ACID Compliance):
      * - DECISION: 'setAutoCommit(false)' is called to treat the two separate updates 
      * (debit and credit) as a single unit of work.
      * - COMMIT: If both updates execute without error, 'conn.commit()' is called 
@@ -370,7 +378,8 @@ public class UserStore {
     
     /**
      * Fetches the full history of transactions for a specific user.
-     * * LOGIC & LOOP:
+     * 
+     * LOGIC & LOOP:
      * - The SQL query uses 'ORDER BY transaction_date DESC' to ensure the UI displays 
      * the most recent activity first.
      * - LOOP: A 'while (rs.next())' loop iterates through the ResultSet, mapping 
@@ -391,7 +400,6 @@ public class UserStore {
 
            try (ResultSet rs = pstmt.executeQuery()) {
                while (rs.next()) {
-                   // Use the second constructor we added to the Transaction class
                    Transaction t = new Transaction(
                        rs.getTimestamp("transaction_date").toLocalDateTime(),
                        rs.getString("description"),
@@ -421,8 +429,7 @@ public class UserStore {
         
         String query = "INSERT INTO transactions (transaction_id, user_id, description, type, amount, note) " +
                    "VALUES (?, ?, ?, ?, ?, ?)";
-
-        // Use your existing DatabaseConnection utility
+        
         try (Connection conn = DatabaseConnection.getConnection(); 
              PreparedStatement pstmt = conn.prepareStatement(query)) {
 
@@ -439,8 +446,10 @@ public class UserStore {
         }
     }
     
-    /** * Updates the user's display name in the 'users' table.
-     * * DECISION:
+    /** 
+     * Updates the user's display name in the 'users' table.
+     * 
+     * DECISION:
      * - Returns the result of 'executeUpdate() > 0', which effectively acts as a 
      * boolean check to see if the ID was valid and the row was modified.
      * 
@@ -465,7 +474,8 @@ public class UserStore {
         }
     }
 
-    /** * Updates the account recovery data for a user.
+    /** 
+     * Updates the account recovery data for a user.
      * 
      * @param userId The unique ID of the user.
      * @param question The updated security question text.
@@ -490,8 +500,10 @@ public class UserStore {
         }
     }
 
-    /** * Updates the user's password hash in the database.
-     * * LOGIC:
+    /** 
+     * Updates the user's password hash in the database.
+     * 
+     * LOGIC:
      * - Calls 'PasswordUtil.hashPassword' to ensure the 'rawNewPassword' is never 
      * stored as plain text, maintaining system security.
      * 
@@ -517,8 +529,10 @@ public class UserStore {
         }
     }
 
-    /** * Compares a provided password against the one stored in the database.
-     * * DECISION:
+    /**
+     * Compares a provided password against the one stored in the database.
+     * 
+     * DECISION:
      * - Uses '.equals()' to compare the newly hashed input with the database result.
      * - If 'rs.next()' is false, the method defaults to false as the user ID is invalid.
      * 
@@ -547,8 +561,10 @@ public class UserStore {
         return false;
     }
     
-    /** * Retrieves a full BankAccount data model based on the Primary Key.
-     * * LOGIC:
+    /** 
+     * Retrieves a full BankAccount data model based on the Primary Key.
+     * 
+     * LOGIC:
      * - Maps SQL 'ResultSet' columns directly to the 'BankAccount' constructor 
      * parameters for consistent object instantiation.
      * 
@@ -581,7 +597,8 @@ public class UserStore {
        return null;
     }
    
-    /** * Permanently removes a user record from the database.
+    /** 
+     * Permanently removes a user record from the database.
      * 
      * @param userId The Primary Key of the user to be deleted.
      * @return true if a row was actually removed; false if the ID did not exist.
