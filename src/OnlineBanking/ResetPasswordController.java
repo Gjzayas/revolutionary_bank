@@ -179,7 +179,7 @@ public class ResetPasswordController {
             strengthLabel.setTextFill(Color.ORANGE);
         
         } else {
-            strengthBar.setStyle("-fx-accent: #00FF7F;"); // Your Sea Green success color
+            strengthBar.setStyle("-fx-accent: #00FF7F;"); 
             strengthLabel.setText("Password Strength: Strong");
             strengthLabel.setTextFill(Color.web("#00FF7F"));
         }
