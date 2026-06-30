@@ -14,12 +14,13 @@ import java.util.UUID;
  * The central data management hub for the Revolutionary Bank application.
  * This class facilitates all interactions between the Java application and the 
  * MySQL database. It handles security-critical operations including password 
- * verification, ACID-compliant financial transfers, and transaction auditing.
+ * verification, ACID-compliant financial transfers, transaction auditing, 
+ * and Loan processing.
  * 
  * 
  * @author Gabriel J. Zayas
- * Date: 4/17/2026
- * @version 3.0
+ * Date: 6/22/2026
+ * @version 4.0
  * 
  */
 public class UserStore {
@@ -134,7 +135,7 @@ public class UserStore {
 
     /**
      * Checks if a username already exists to prevent duplicate registrations.
-     *
+     * 
      * @param username The identifier to verify.
      * @return true if the username is found (case-insensitive).
      */
@@ -143,7 +144,7 @@ public class UserStore {
         
         try (Connection conn = DatabaseConnection.getConnection();
              PreparedStatement pstmt = conn.prepareStatement(query)) {
-            
+                
             pstmt.setString(1, username.toLowerCase());
             
             try (ResultSet rs = pstmt.executeQuery()) {
@@ -193,7 +194,7 @@ public class UserStore {
     
     /**
      * Updates the password hash for a user.
-     *
+     * 
      * @param username The user's login name.
      * @param hashedPassword The pre-hashed new password string.
      */
@@ -335,10 +336,12 @@ public class UserStore {
 
                 conn.commit(); // Save changes
                 return true;
+            
             } catch (SQLException e) {
                 conn.rollback(); // Undo changes if something goes wrong
                 e.printStackTrace();
             }
+        
         } catch (SQLException e) {
             e.printStackTrace();
         }
@@ -373,6 +376,34 @@ public class UserStore {
         } catch (SQLException e) {
             System.err.println("SQL ERROR in logTransaction: " + e.getMessage());
             e.printStackTrace();
+        }
+    }
+    
+    /**
+     * Saves a new transaction record into the system database.
+     * * This method automatically creates a random, unique 8-character tracking ID 
+     * prefixed with "TR-L-" (for example: TR-L-A1B2C3D4), maps all the transaction 
+     * details like description, type, amount, and notes, and inserts them straight 
+     * into the transaction history table.
+     * 
+     * * @param userId The ID number of the bank user who owns this transaction.
+     * @param t      The transaction object containing the amount, type, description, and notes.
+     * @param conn   The active database connection being used to run this save operation.
+     * @throws SQLException If something goes wrong while communicating with the SQL database.
+     */
+    public static void logTransaction(int userId, Transaction t, Connection conn) throws SQLException {
+        String transactionId = "TR-L-" + UUID.randomUUID().toString().substring(0, 8).toUpperCase();
+
+        String query = "INSERT INTO transactions (transaction_id, user_id, description, type, amount, note) VALUES (?, ?, ?, ?, ?, ?)";
+
+        try (PreparedStatement pstmt = conn.prepareStatement(query)) {
+            pstmt.setString(1, transactionId);
+            pstmt.setInt(2, userId);
+            pstmt.setString(3, t.getDescription());
+            pstmt.setString(4, t.getType());
+            pstmt.setDouble(5, t.getAmount());
+            pstmt.setString(6, t.getNote());
+            pstmt.executeUpdate();
         }
     }
     
@@ -424,12 +455,12 @@ public class UserStore {
      * @param amount The initial numerical value being added to the account.
      */
     public static void logInitialDeposit(int userId, double amount) {
-        // Generate a unique ID (e.g., TR-12345678)
-        String transactionId = "TR-" + System.currentTimeMillis();
+        // Generate a unique ID (e.g., TR-INIT-12345678)
+        String transactionId = "TR-INIT-" + UUID.randomUUID().toString().substring(0, 8).toUpperCase();
         
         String query = "INSERT INTO transactions (transaction_id, user_id, description, type, amount, note) " +
                    "VALUES (?, ?, ?, ?, ?, ?)";
-        
+
         try (Connection conn = DatabaseConnection.getConnection(); 
              PreparedStatement pstmt = conn.prepareStatement(query)) {
 
@@ -529,7 +560,7 @@ public class UserStore {
         }
     }
 
-    /**
+    /** 
      * Compares a provided password against the one stored in the database.
      * 
      * DECISION:
@@ -574,7 +605,7 @@ public class UserStore {
     public static BankAccount findAccountById(int userId) {
        String query = "SELECT * FROM users WHERE id = ?";
        
-        try (Connection conn = DatabaseConnection.getConnection();
+       try (Connection conn = DatabaseConnection.getConnection();
             PreparedStatement pstmt = conn.prepareStatement(query)) {
 
            pstmt.setInt(1, userId);
@@ -616,6 +647,310 @@ public class UserStore {
         } catch (SQLException e) {
             e.printStackTrace();
             return false;
+        }
+    }
+    
+    /**
+     * Records a new loan application and its status determined by the LoanEngine.
+     * 
+     * LOGIC & DECISIONS:
+     * 1. If the loan is 'APPROVED', this method initiates a Transaction (ACID) to 
+     *    simultaneously update the user's balance and record the loan.
+     * 2. If 'DENIED' or 'PENDING', it simply logs the record for history/review.
+     * 
+     * @param loan The Loan object containing principal, status, and engine notes.
+     * @return true if the database operations were successful.
+     */
+    public static boolean submitLoanRequest(Loan loan) {
+        String loanQuery = "INSERT INTO loans (user_id, principal_amount, interest_rate, term_months, monthly_income_reported, status, status_note) VALUES (?, ?, ?, ?, ?, ?, ?)";
+        String balanceQuery = "UPDATE users SET balance = balance + ? WHERE id = ?";
+
+        try (Connection conn = DatabaseConnection.getConnection()) {
+            conn.setAutoCommit(false); // Enable Transaction for Approved loans
+
+            try (PreparedStatement loanPstmt = conn.prepareStatement(loanQuery);
+                 PreparedStatement balPstmt = conn.prepareStatement(balanceQuery)) {
+
+                // 1. Insert Loan Record
+                loanPstmt.setInt(1, loan.getUserId());
+                loanPstmt.setDouble(2, loan.getPrincipalAmount());
+                loanPstmt.setDouble(3, loan.getInterestRate());
+                loanPstmt.setInt(4, loan.getTermMonths());
+                loanPstmt.setDouble(5, loan.getMonthlyIncome());
+                loanPstmt.setString(6, loan.getStatus());
+                loanPstmt.setString(7, loan.getStatusNote());
+                loanPstmt.executeUpdate();
+
+                // 2. If APPROVED, immediately credit the account
+                if (loan.getStatus().equals("APPROVED")) {
+                    balPstmt.setDouble(1, loan.getPrincipalAmount());
+                    balPstmt.setInt(2, loan.getUserId());
+                    balPstmt.executeUpdate();
+                    
+                    // Logic: Auto-log a transaction for the audit trail
+                    Transaction loanCredit = new Transaction(
+                        java.time.LocalDateTime.now(),
+                        "Loan Disbursement",
+                        "LOAN",
+                        loan.getPrincipalAmount(),
+                        "Auto-approved by Credit Engine"
+                    );
+                    logTransaction(loan.getUserId(), loanCredit, conn);
+                }
+
+                conn.commit();
+                return true;
+
+            } catch (SQLException e) {
+                conn.rollback();
+                System.err.println("Loan Submission Rollback: " + e.getMessage());
+                return false;
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+
+    /**
+     * Checks if a user has an active or pending loan to prevent duplicate requests.
+     * 
+     * @param userId The ID of the user to check.
+     * @return true if an 'APPROVED' or 'PENDING' loan exists.
+     */
+    public static boolean hasActiveLoan(int userId) {
+        String query = "SELECT 1 FROM loans WHERE user_id = ? AND (status = 'APPROVED' OR status = 'PENDING')";
+        
+        try (Connection conn = DatabaseConnection.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(query)) {
+            
+            pstmt.setInt(1, userId);
+            try (ResultSet rs = pstmt.executeQuery()) {
+                return rs.next();
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+
+    /**
+     * Fetches the current loan details for a user to display in the UI.
+     * 
+     * @param userId The ID of the user.
+     * @return A Loan object, or null if no loan exists.
+     */
+    public static Loan getLatestLoan(int userId) {
+        String query = "SELECT * FROM loans WHERE user_id = ? ORDER BY application_date DESC LIMIT 1";
+
+        try (Connection conn = DatabaseConnection.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(query)) {
+
+            pstmt.setInt(1, userId);
+            try (ResultSet rs = pstmt.executeQuery()) {
+                if (rs.next()) {
+                    Loan loan = new Loan(
+                    rs.getInt("loan_id"),
+                    rs.getInt("user_id"),
+                    rs.getDouble("principal_amount"),
+                    rs.getDouble("interest_rate"),
+                    rs.getInt("term_months"),
+                    rs.getDouble("monthly_income_reported"),
+                    rs.getString("status"),
+                    rs.getString("status_note"),
+                    rs.getTimestamp("application_date").toLocalDateTime()
+                );
+                
+                loan.setTotalPaid(rs.getDouble("total_paid")); 
+                
+                return loan;
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+    
+    /**
+    * Retrieves all loans currently in a 'PENDING' state for background processing.
+    * 
+    * @return A list of Loan objects awaiting a final decision.
+    */
+    public static List<Loan> fetchAllPendingLoans() {
+       List<Loan> pendingLoans = new ArrayList<>();
+       String query = "SELECT * FROM loans WHERE status = 'PENDING'";
+
+       try (Connection conn = DatabaseConnection.getConnection();
+            PreparedStatement pstmt = conn.prepareStatement(query);
+            ResultSet rs = pstmt.executeQuery()) {
+
+           while (rs.next()) {
+               pendingLoans.add(new Loan(
+                   rs.getInt("loan_id"),
+                   rs.getInt("user_id"),
+                   rs.getDouble("principal_amount"),
+                   rs.getDouble("interest_rate"),
+                   rs.getInt("term_months"),
+                   rs.getDouble("monthly_income_reported"),
+                   rs.getString("status"),
+                   rs.getString("status_note"),
+                   rs.getTimestamp("application_date").toLocalDateTime()
+               ));
+           }
+       } catch (SQLException e) {
+           System.err.println("Error fetching pending loans: " + e.getMessage());
+       }
+       return pendingLoans;
+    }
+    
+    /**
+    * Finalizes a pending loan by either approving or denying it.
+    * 
+    * @param loanId The ID of the loan record.
+    * @param userId The ID of the owner.
+    * @param approve Boolean to determine the final status.
+    */
+    public static void finalizePendingLoan(int loanId, int userId, double amount, boolean approve) {
+       String status = approve ? "APPROVED" : "DENIED";
+       String note = approve ? "Post-review: Credit criteria met." : "Post-review: High debt-to-income ratio.";
+
+       String updateLoan = "UPDATE loans SET status = ?, status_note = ? WHERE loan_id = ?";
+       String updateBalance = "UPDATE users SET balance = balance + ? WHERE id = ?";
+
+       try (Connection conn = DatabaseConnection.getConnection()) {
+           conn.setAutoCommit(false);
+
+           try (PreparedStatement lPstmt = conn.prepareStatement(updateLoan);
+                PreparedStatement bPstmt = conn.prepareStatement(updateBalance)) {
+
+               // 1. Update Loan Status
+               lPstmt.setString(1, status);
+               lPstmt.setString(2, note);
+               lPstmt.setInt(3, loanId);
+               lPstmt.executeUpdate();
+
+               // 2. If Approved, credit the account and log the audit trail
+               if (approve) {
+                   bPstmt.setDouble(1, amount);
+                   bPstmt.setInt(2, userId);
+                   bPstmt.executeUpdate();
+
+                   Transaction t = new Transaction(
+                       java.time.LocalDateTime.now(),
+                       "Loan Disbursement",
+                       "LOAN",
+                       amount,
+                       "Loan Approved"
+                   );
+                   logTransaction(userId, t, conn);
+               }
+
+               conn.commit();
+               System.out.println("[DB] Loan " + loanId + " finalized as " + status);
+
+           } catch (SQLException e) {
+               conn.rollback();
+               e.printStackTrace();
+           }
+       } catch (SQLException e) {
+           e.printStackTrace();
+       }
+    }
+
+    /**
+     * Updates a loan record in the database whenever a user makes a payment.
+     * * This method connects to the database, looks up the specific loan by its ID number, 
+     * and adds the new payment amount to the running total of what has been paid back so far.
+     * 
+     * * @param loanId The unique ID number of the loan being paid off.
+     * @param paymentAmount The amount of money the user is paying toward the loan in this transaction.
+     */
+    public static void updateLoanBalance(int loanId, double paymentAmount) {
+        String sql = "UPDATE loans SET total_paid = total_paid + ? WHERE loan_id = ?";
+
+        try (Connection conn = DatabaseConnection.getConnection();
+              PreparedStatement pstmt = conn.prepareStatement(sql)) {
+
+             pstmt.setDouble(1, paymentAmount);
+             pstmt.setInt(2, loanId);
+             pstmt.executeUpdate();
+
+        } catch (SQLException e) {
+             e.printStackTrace();
+        }
+    }
+    
+    /**
+    * Retrieves the current balance for a specific account type belonging to a user.
+    * 
+    * @param userId The ID of the logged-in user.
+    * @param accountType The type of account (e.g., "Checking", "Savings").
+    * @return The account balance as a double, or 0.0 if not found.
+    */
+    public static double getAccountBalance(int userId, String accountType) {
+        String sql = "SELECT balance FROM users WHERE user_id = ?";
+        double balance = 0.0;
+
+        try (Connection conn = DatabaseConnection.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+
+            pstmt.setInt(1, userId);
+
+            try (ResultSet rs = pstmt.executeQuery()) {
+                if (rs.next()) {
+                    balance = rs.getDouble("balance");
+                }
+            }
+        } catch (SQLException e) {
+            System.err.println("[Database Error] Could not fetch account balance: " + e.getMessage());
+            e.printStackTrace();
+        }
+
+        return balance;
+    }
+   
+    /**
+     * Updates the user's balance in the 'users' table using relative math.
+     * 
+     * @param userId The unique ID of the user.
+     * @param amountChange The amount to add (positive) or deduct (negative).
+     */
+    public static void updateAccountBalance(int userId, double amountChange) {
+        String sql = "UPDATE users SET balance = balance + ? WHERE id = ?";
+
+        try (Connection conn = DatabaseConnection.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+
+            pstmt.setDouble(1, amountChange);
+            pstmt.setInt(2, userId);
+            pstmt.executeUpdate();
+
+        } catch (SQLException e) {
+            System.err.println("[Database Error] Failed to update balance in users table: " + e.getMessage());
+            e.printStackTrace();
+        }
+    }
+    
+    /**
+    * Updates the status of a specific loan.
+    * 
+    * @param loanId The ID of the loan to update.
+    * @param newStatus The new status string (e.g., "PAID", "DENIED", "APPROVED").
+    */
+    public static void updateLoanStatus(int loanId, String newStatus) {
+        String sql = "UPDATE loans SET status = ? WHERE loan_id = ?";
+
+        try (Connection conn = DatabaseConnection.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+
+            pstmt.setString(1, newStatus);
+            pstmt.setInt(2, loanId);
+            pstmt.executeUpdate();
+
+        } catch (SQLException e) {
+            System.err.println("[Database Error] Failed to update loan status: " + e.getMessage());
+            e.printStackTrace();
         }
     }
 }
