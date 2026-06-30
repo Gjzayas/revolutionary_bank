@@ -1,112 +1,121 @@
 # revolutionary_bank
-🏦 Revolutionary Bank - Version 3.0
-Revolutionary Bank is a robust, professional-grade financial platform built with JavaFX and MySQL. Transitioning from local serialization to a relational database, this application now offers a fully persistent, secure, and responsive banking experience.
+🏦 Revolutionary Bank - Version 4.0
+Revolutionary Bank is a robust, professional-grade financial platform built with JavaFX and MySQL. Featuring an architecture that scales from local serialization to a fully persistent, secure relational database, this application offers a high-contrast responsive banking experience tailored to the "Executive" brand profile.
 
-🚀 Key Version 3.0 Updates
-Since the initial release, the platform has undergone a complete architectural overhaul to improve security, scalability, and user experience.
+🚀 Key Version 4.0 Updates
+Since its previous release, the platform has integrated an asynchronous background task layer to support automated credit evaluations, added comprehensive visual overrides for monetary ledgers, and streamlined real-time data syncs across sub-views.
+
+🏛 The Automated Loan Center & Background Processing
+Version 4.0 introduces a state-of-the-art Automated Loan Request Center that models commercial banking lifecycles. Rather than locking up the application thread during complex database evaluations, the lending center is driven by an independent, multi-threaded background processing engine.
+
+🔄 End-to-End Lending Workflow
+1. Application Submission: Within the Loan Center sub-view, users specify their requested principal amount and input their verified monthly income using stylized custom inputs.
+
+2. State Persistence: When submitted, the application is assigned a unique tracking ID and written to the ACID-compliant MySQL database with a structural status of PENDING.
+
+3. Asynchronous Processing: The background service checks for pending applications, processes them against internal credit scoring logic, and instantly updates the status.
+
+4. Instant View Synchronization: Once processed, internal event hooks tell the dashboard to update balances and transaction history logs automatically.
+
+⚙️ Under the Hood: The Background Architecture
+The lending backend is explicitly decoupled from the user interface to ensure the primary GUI thread remains stutter-free:
+
+Isolated Thread Execution (LoanProcessor): Built using a ScheduledExecutorService pool (Executors.newSingleThreadScheduledExecutor()), the processor boots up concurrently during application initialization (App.java). It runs on an independent worker thread entirely insulated from the main JavaFX Application Thread.
+
+Automated Risk Assessment Matrix: Every 60 seconds, the engine awakens and polls the MySQL database (UserStore.fetchAllPendingLoans()). It evaluates outstanding profiles against a rigid debt-to-income metric:
+
+Approval Condition → Principal Amount ≤ (Monthly Income x 10)
+
+ACID-Compliant Finalization: If an application passes the evaluation, it is flagged as APPROVED, and the principal is atomically injected directly into the user's Checking account balance. If it fails the safety rule, it is securely updated to DENIED.
+
+Resource Lifecycle Guardrails: To prevent background zombie threads, a termination hook is bound to the primary stage layout close request (primaryStage.setOnCloseRequest()). Closing the application intercepts the thread pool, gives active processes up to 5 seconds to commit running updates safely, and cuts hanging tasks.
 
 🔐 Advanced Security & Data Maintenance
-MySQL Integration: Replaced local object serialization with a robust MySQL backend, ensuring data integrity across sessions.
+MySQL Integration: All interactions operate over a persistent relational database model, guaranteeing complete transaction safety and cross-session integrity.
 
-SHA-256 Cryptographic Hashing: All sensitive data, including passwords and security answers, are one-way hashed using SHA-256 before being persisted to the database.
+SHA-256 Cryptographic Hashing: Sensitive customer records—including passwords and secondary security questions—are irreversibly one-way hashed using SHA-256 protocols before persistence.
 
-Persistent "Remember Me": The Login screen now features a "Remember Me" utility that securely caches credentials for a streamlined return experience.
+Persistent "Remember Me": Caches login metadata inside protected local environments to streamline subsequent user authentication sessions.
 
 👤 Profile Management Dashboard
-An entirely new Profile Command Center has been added to the dashboard, allowing users to:
+An intuitive Profile Command Center inside the sidebar allows users to manage their administrative identity securely:
 
-Real-time Identity Updates: Modify your Full Name with immediate reflection in the Dashboard greeting.
+Real-Time Identity Updates: Modify your registered name with immediate reflection across dashboard greetings and active session wrappers.
 
-Security Overhaul: Update your unique Security Question and Answer (fully hashed) at any time.
+Security Rotation: Dynamically alter your security questions and answers using automated backend validation.
 
-Secure Password Rotation: Change your password with built-in verification of your current credentials.
+Credentials Verification: Force confirmation matching against current records prior to authorizing a password change.
 
-Account Termination: A permanent "Delete Account" feature with a professional confirmation workflow.
+Permanent Account Termination: Features an enterprise-grade confirmation workflow that performs safe cascading database cleanups upon account deletion.
 
-🎨 UI/UX & Responsive Design
-Password Strength Indicators: Integrated dynamic ProgressIndicator logic across the Signup, Profile, and Reset Password screens.
+🎨 UI/UX & Centralized CSS Styling
+The look-and-feel uses a centralized styling architecture (style.css) configured to a Midnight Navy (#001f3f) and Institutional Silver (#c0c0c0) executive layout scheme:
 
-Password Visibility Toggles: All password fields now feature "Eye" icons to toggle between masked and plain-text for better accessibility.
+Table View Enhancements: Table headers leverage gradient overlays to look like metallic silver plaques. Rows feature subtle alternate zebra striping (#00152b) and shift color properties dynamically on selection or mouseover events.
 
-Responsive Signup & Reset Screens: Redesigned layouts to ensure all components scale gracefully across different window sizes.
+Anti-Ghosting Render Defenses: Custom TableCell factories clear out cached CSS classes dynamically during fast scroll passes to prevent deposit/withdrawal highlight bleeding.
 
-Smart Feedback Labels: All input screens now utilize color-coded status labels (Sea Green for success, Crimson for errors) that clear automatically when the user starts typing.
+Customized UI Controls: Dropdown selectors (ComboBox) match form inputs perfectly by custom-positioning arrow nodes, mapping arrow shapes to accent marks, and tinting popover contextual menu panels.
+
+Smart Feedback Displays: Data validation forms use color-coded status elements (Sea Green for success indicators, Crimson Red for application warnings) that clear out automatically as soon as the user starts typing.
 
 ✨ Core Features
-Modern UI/UX: A consistent Midnight Navy and Institutional Silver theme applied across all screens using a centralized CSS architecture.
+Modern Navigation Matrix: Responsive sidebar navigation where buttons dynamically light up (nav-button-active) to represent the active loaded sub-page layout.
 
-Dynamic Dashboard: Sidebar navigation where buttons light up to indicate the active view.
+Peer-to-Peer Transfers: Transfer funds between system accounts with real-time balance verification, input cleansing, and automatic currency formatting.
 
-Peer-to-Peer Transfers: Transfer funds between platform accounts with real-time balance validation and currency formatting.
-
-Intelligent Financial Ledger: A styled TableView utilizing custom CSS for a high-end financial ledger look, featuring alternate row striping.
+Intelligent Ledger Highlight Engine: Integrates smart color-tracking rules that highlight recent activity in bold colors (such as Emerald Green or Orange-Red) without interfering with controller cell-factory properties.
 
 🛠 Built With
-JavaFX: Core framework for the graphical user interface.
+JavaFX: Core UI framework for generating responsive layout containers.
 
-MySQL: Relational database management for persistent data storage.
+MySQL: Relational database management engine for robust data persistence.
 
-SceneBuilder: Used for designing responsive .fxml layouts.
+SceneBuilder: Graphical tool utilized to construct semantic .fxml structural layouts.
 
-CSS3: Custom styling for brand identity and high-fidelity UI components.
+CSS3: Advanced vector formatting scripts for theme identity and layout components.
 
 🏁 Getting Started
-Clone the repo:
+Clone the repository:
 
 Bash
-
 git clone https://github.com/Gjzayas/revolutionary_bank.git
 
-Database Setup: Import the provided .sql schema into your MySQL instance.
+Database Setup: Run and import the provided .sql database schemas directly into your local running MySQL instance.
 
-Open in IDE: Import the project into NetBeans, IntelliJ, or Eclipse.
+Open in IDE: Import the project directory inside NetBeans, IntelliJ IDEA, or Eclipse.
 
-Clean and Build: Ensure the MySQL Connector/J driver is included in your libraries.
+Clean and Build: Verify that the MySQL Connector/J driver dependency is linked properly inside your project libraries.
 
-Run: Launch the application via App.java.
-
+Run: Execute the primary system thread by launching App.java.
 
 🧪 Testing & Quality Assurance
-Revolutionary Bank utilizes an automated testing suite to ensure data integrity and the reliability of financial transactions. These tests validate the Atomicity and Durability of the system, specifically focusing on the interactions between the Java application and the MySQL database.
+Revolutionary Bank utilizes an automated testing suite to validate system atomicity, isolation constraints, and the reliability of financial updates across the Java runtime environments and the relational database layer.
 
 📋 Test Suites
-Transfer Integration Test (TransferIntegrationTest):
+Transfer Integration Test (TransferIntegrationTest): Validates the end-to-end P2P fund transfer lifecycle. It confirms that the sender's balance is debited and the recipient's balance is credited concurrently, verifies audit log entries, and invokes automated schema sweeps to wipe test values post-execution.
 
-Validates the end-to-end P2P fund transfer lifecycle.
+User Deletion Integrity Test (UserDeletionTest): Verifies database execution across account closure requests. It tests that removing a master account record triggers a CASCADE delete to clean all dependent tracking records and eliminate orphaned logs.
 
-Ensures that when a transfer occurs, the sender’s balance is debited and the recipient’s balance is credited simultaneously.
-
-Verifies that audit logs (Transactions) are generated for both parties and persisted correctly.
-
-Includes an automated cleanup routine that purges test data after completion.
-
-User Deletion & Integrity Test (UserDeletionTest):
-
-Verifies that account deletion works across the entire database.
-
-Confirms that removing a user correctly triggers a CASCADE delete, wiping all associated transaction history to prevent orphaned data.
-
-Relational Integrity Test:
-
-Specifically targets the foreign key relationships between the users and transactions tables to ensure database constraints are functioning as expected at the engine level.
+Relational Integrity Test: Targets foreign key constraint definitions between the tables directly at the engine level to verify structural integrity.
 
 🛠 Prerequisites for Testing
-To run the automated tests within your IDE (NetBeans, IntelliJ, or Eclipse), ensure your project environment includes the following dependencies:
+Ensure your development environment contains the following testing libraries:
 
-JUnit 4 & JUnit 5 (Jupiter): The core testing frameworks used for test runners and assertions.
+JUnit 4 & JUnit 5 (Jupiter): Core assertion wrappers and execution runners.
 
-Hamcrest: Required for advanced matchers and descriptive error messages during assertions.
+Hamcrest: Matcher components for evaluation log parsing.
 
-MySQL Connector/J: Necessary for the tests to establish a live connection to the test schema.
+MySQL Connector/J: Driver dependency to establish direct data connections to the test schemas.
 
 🚦 Running Tests
-Ensure your local MySQL server is running and the revolutionary_bank schema is initialized.
+Verify that your local MySQL server instance is active and the revolutionary_bank schema has been properly initialized.
 
-Right-click the test package in your IDE.
+Right-click the dedicated test package structure in your preferred IDE.
 
-Select "Run Test" or "Test File."
+Select Run Test or Test File.
 
-View the results in the Test Results window to confirm all green checks.
+Monitor execution panels to confirm all structural verification passes return successful checks.
 
 
 
