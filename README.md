@@ -121,6 +121,14 @@ Monitor execution panels to confirm all structural verification passes return su
 
 Short Video Demonstrations:
 
+🏛 New Loan Center Demonstrations:
+
+Automatic Loan Approval:
+
+
+https://github.com/user-attachments/assets/cc9715a7-dc8c-4c37-91d0-41810bb37213
+
+
 Registration Signup Demonstration:
 
 
