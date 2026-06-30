@@ -24,9 +24,10 @@ import javafx.scene.control.Button;
  * 1.0 - Initial GUI with static data.
  * 2.0 - Implementation of Java Object Serialization for local persistence.
  * 3.0 - Migration to MySQL RDBMS; added transaction atomicity and focus-based UI clearing.
- *
+ * 4.0 - Integrated the new automated Loan Request Center, dynamic UI layout cards, and auto-refresh processing trackers.
+ * 
  * @author: Gabriel J. Zayas
- * Date: 4/06/2026
+ * Date: 6/19/2026
  * @version 3.0
  * 
  */
@@ -49,6 +50,9 @@ public class DashboardController {
     
     /** Navigation button to view and edit user profile settings. */
     @FXML private Button profileBtn;
+    
+    /** Navigation button to view and edit user loadBtn settings. */
+    @FXML private Button loanBtn;
 
     /** The data model representing the currently authenticated user's account. */
     private BankAccount userAccount; // The injected Model
@@ -95,6 +99,7 @@ public class DashboardController {
         transferBtn.getStyleClass().remove("nav-button-active");
         historyBtn.getStyleClass().remove("nav-button-active");
         profileBtn.getStyleClass().remove("nav-button-active");
+        loanBtn.getStyleClass().remove("nav-button-active");
 
         // Add the active class to the one that was just clicked
         if (!activeBtn.getStyleClass().contains("nav-button-active")) {
@@ -136,12 +141,21 @@ public class DashboardController {
             
             } else if (controller instanceof HistoryController) {
                 ((HistoryController) controller).setAccount(userAccount);
+                
+            } else if (controller instanceof LoanController) {
+                // Inject the account model into the Loan Controller
+                ((LoanController) controller).setUserAccount(userAccount);
             
             } else if (controller instanceof ProfileController) {
                 ProfileController profileCtrl = (ProfileController) controller;
                 profileCtrl.setUserId(userAccount.getId());
                 // Inject the dashboard controller so the profile can talk back to it
                 profileCtrl.setParentController(this);
+            
+            } else if (controller instanceof LoanController) {
+                LoanController loanCtrl = (LoanController) controller;
+                loanCtrl.setUserAccount(userAccount);
+                loanCtrl.setParentController(this);
             }
 
             mainPane.setCenter(root);
@@ -188,6 +202,15 @@ public class DashboardController {
         setActiveButton(profileBtn);
     }
     
+    /**
+    * Navigates the user to the Loan Center sub-view and updates button styling.
+    */
+   @FXML
+   private void showLoanCenter() {
+       loadPage("LoanView"); 
+       setActiveButton(loanBtn);
+   }
+
     /**
      * Handles the logout process by clearing the session and returning to the login screen.
      * Safely identifies the current stage regardless of how the method was triggered.
@@ -245,5 +268,36 @@ public class DashboardController {
                welcomeLabel.setText("Welcome, " + firstName + "!");
            }
        }
+    }
+    
+    /**
+     * Refreshes the account data from the database and updates the active UI components.
+     * This is called after transactions or loan payments to ensure the dashboard 
+     * and sub-views show accurate balances.
+     */
+    public void refreshBalances() {
+        // 1. Fetch the absolute latest account data from the database
+        BankAccount latestData = UserStore.findAccountByNumber(userAccount.getAccountNumber());
+        
+        if (latestData != null) {
+            // Update the master model in the Dashboard
+            this.userAccount = latestData;
+            
+            // Re-sync the transaction list for the updated model
+            this.userAccount.getTransactionHistory().clear();
+            this.userAccount.getTransactionHistory().addAll(
+                UserStore.loadTransactionHistory(userAccount.getId())
+            );
+        }
+
+        // 2. Identify the controller currently loaded in the mainPane
+        // Use the FXMLLoader to see what is currently being displayed
+        Node centerNode = mainPane.getCenter();
+        
+        if (homeBtn.getStyleClass().contains("nav-button-active")) {
+            showOverview(); 
+        }
+        
+        System.out.println("[System] Global balances synchronized with Database.");
     }
 }
