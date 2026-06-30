@@ -23,8 +23,8 @@ import javafx.scene.control.TableCell;
  * history into a professionally formatted official bank statement (TXT file).
  * 
  * @author: Gabriel Zayas
- * Date: 2/20/2026
- * @version 3.0
+ * Date: 6/16/2026
+ * @version 4.0
  * 
  */
 public class HistoryController {
@@ -148,10 +148,14 @@ public class HistoryController {
                     if ("Debit".equalsIgnoreCase(type)) {
                         String color = isMostRecent ? "#ff0000" : "#FF4500";
                         setStyle("-fx-text-fill: " + color + "; -fx-font-weight: bold;");
+                        getStyleClass().removeAll("recent-credit", "text-deposit");
+                        getStyleClass().add(isMostRecent ? "recent-debit" : "text-withdrawal");
                     
-                    } else if ("Credit".equalsIgnoreCase(type) || "DEPOSIT".equalsIgnoreCase(type)) {
+                    } else if ("Credit".equalsIgnoreCase(type) || "DEPOSIT".equalsIgnoreCase(type) || "Loan".equalsIgnoreCase(type)) {
                         String color = isMostRecent ? "#00ff00" : "#00FF7F";
                         setStyle("-fx-text-fill: " + color + "; -fx-font-weight: bold;");
+                        getStyleClass().removeAll("recent-debit", "text-withdrawal");
+                        getStyleClass().add(isMostRecent ? "recent-credit" : "text-deposit");
                     } 
                 }
             }
@@ -198,13 +202,13 @@ public class HistoryController {
             writer.println("Account Holder: " + account.getFullName());
             writer.println("Account Number: " + account.getAccountNumber());
             writer.println("Generated on: " + LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")));
-            writer.println("----------------------------------------------------------------------------------------------------");
+            writer.println("-------------------------------------------------------------------------------------------------------");
 
             // Format string ensures consistent column alignment in the TXT output
             String format = "%-18s %-25s %-12s %-18s %-20s%n";
 
             writer.printf(format, "Date", "Description", "Type", "Amount", "Note");
-            writer.println("----------------------------------------------------------------------------------------------------");
+            writer.println("-------------------------------------------------------------------------------------------------------");
 
             for (Transaction t : account.getTransactionHistory()) {
                 writer.printf(format,
@@ -215,7 +219,7 @@ public class HistoryController {
                         (t.getNote() == null || t.getNote().isEmpty()) ? "N/A" : t.getNote());
             }
 
-            writer.println("----------------------------------------------------------------------------------------------------");
+            writer.println("-------------------------------------------------------------------------------------------------------");
             writer.println("Current Balance: $" + String.format("%,.2f", account.getBalance()));
 
         } catch (Exception e) {
