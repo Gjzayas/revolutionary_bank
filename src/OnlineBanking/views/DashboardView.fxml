@@ -23,6 +23,7 @@
             <Button fx:id="profileBtn" mnemonicParsing="false" onAction="#showProfile" styleClass="nav-button" text="My Profile" />
             <Button fx:id="transferBtn" mnemonicParsing="false" onAction="#showTransfer" styleClass="nav-button" text="Transfer" />
             <Button fx:id="historyBtn" mnemonicParsing="false" onAction="#showHistory" styleClass="nav-button" text="Transactions" />
+            <Button fx:id="loanBtn" mnemonicParsing="false" onAction="#showLoanCenter" styleClass="nav-button" text="Loan Center" />
             <Button fx:id="logoutButton" mnemonicParsing="false" onAction="#handleLogout" styleClass="nav-button" text="Logout" />
          </children>
       </VBox>
