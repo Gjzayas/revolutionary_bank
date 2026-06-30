@@ -1,11 +1,11 @@
-/* 
- * style.css
+/* * style.css
  * Theme: Revolutionary Bank "Executive" Aesthetic
  * Primary Palette: Midnight Navy (#001f3f), Institutional Silver (#c0c0c0)
  * Logic: High-contrast professional interface with subtle gradients.
+ *
  * @author: Gabriel J. Zayas
- * Date: 4/15/2026
- * @version 3.0
+ * Date: 6/30/2026
+ * @version 4.0
  */
 
 /* --- LOGIN & ROOT CONTAINERS --- */
@@ -213,7 +213,7 @@
 /* Account balance label */
 .balance-label {
     -fx-text-fill: #FFFFFF;
-    -fx-font-size: 32px;
+    -fx-font-size: 28px;
     -fx-font-weight: bold;
 }
 
@@ -245,10 +245,14 @@
     -fx-font-weight: bold;
 }
 
-/* Table Rows Logic*/
+.table-view .column-header {
+    -fx-background-color: transparent;
+    -fx-size: 40;
+}
+
+/* Table Rows Background & Border Logic */
 .table-row-cell {
     -fx-background-color: #001f3f;
-    -fx-text-fill: #ffffff;
     -fx-border-color: #002b59;
     -fx-border-width: 0 0 1 0;
 }
@@ -258,65 +262,60 @@
 }
 
 .table-row-cell:hover {
-    -fx-background-color: #003366; /* Highlight on hover */
+    -fx-background-color: #003366; /* Highlight row background on hover */
 }
 
-/**
- * Selection logic.
- * When a row is selected, the background turns silver.
- * This requires the text to flip from white/silver to navy for contrast.
- */
-.table-row-cell:selected {
+/* When a row is selected, the background turns silver */
+.table-row-cell:selected,
+.table-view .table-row-cell:focused:selected {
     -fx-background-color: #c0c0c0;
 }
 
-/* Targets the actual text data inside every row */
+/* Base Font Layout for Cells */
 .table-view .table-cell {
-    -fx-text-fill: #c0c0c0; /* Silver */
     -fx-font-size: 13px;
 }
 
-/* Ensures selected rows have dark text to contrast against the silver selection bar */
-.table-row-cell:selected .table-cell {
-    -fx-text-fill: #001f3f; 
+/* Base Unselected State: Force everything to a clean, highly visible silver */
+.table-view .table-cell,
+.table-view .table-cell .text,
+.table-row-cell:filled .table-cell,
+.table-row-cell:filled .table-cell .text {
+    -fx-text-fill: #c0c0c0;
+    -fx-fill: #c0c0c0;
 }
 
-/* Ensure that when a row is selected, the text node turns navy */
-.table-view .table-row-cell:selected .table-cell .text {
+/* Focused/Deselection Patch: Re-assert silver if a row is focused but NOT selected */
+.table-view .table-row-cell:focused:not(:selected) .table-cell,
+.table-view .table-row-cell:focused:not(:selected) .table-cell .text {
+    -fx-text-fill: #c0c0c0 !important;
+    -fx-fill: #c0c0c0 !important;
+}
+
+/* Hover States: Snap standard row text to pure white on mouseover */
+.table-row-cell:filled:hover .table-cell,
+.table-row-cell:filled:hover .table-cell .text {
+    -fx-text-fill: #ffffff !important;
+    -fx-fill: #ffffff !important;
+}
+
+/* Active Selection State: Flip all row contents to deep navy to contrast against the silver bar */
+.table-row-cell:filled:selected .table-cell,
+.table-row-cell:filled:selected .table-cell .text,
+.table-view .table-row-cell:focused:selected .table-cell,
+.table-view .table-row-cell:focused:selected .table-cell .text,
+.table-row-cell:selected .text {
+    -fx-text-fill: #001f3f !important;
     -fx-fill: #001f3f !important;
 }
 
-.table-view .column-header {
-    -fx-background-color: transparent;
-    -fx-size: 40;
-}
-
-.table-row-cell:selected .text {
-    -fx-fill: #001f3f; /* Dark text when row is selected */
-}
-
-/* Makes the text pure white when a row is hovered for better focus */
-.table-row-cell:hover .table-cell {
-    -fx-text-fill: #ffffff;
-}
-
-/* Specifically ensures that even after being deselected, the row remains silver */
-.table-row-cell:filled .table-cell{
-    -fx-text-fill: #c0c0c0;
-}
-
-/* Ensures the text doesn't flip to black when hovering over a deselected row */
-.table-row-cell:filled:hover .table-cell {
-    -fx-text-fill: #ffffff;
-}
-
-/* Keeps the dark navy text ONLY when the row is currently selected for high contrast */
-.table-row-cell:filled:selected .table-cell{
-    -fx-text-fill: #001f3f; 
-}
-
-.table-view .table-row-cell:focused .table-cell {
-    -fx-text-fill: #c0c0c0 !important;
+/* Currency Column Protection: Force Java inline cell styles to stick for non-selected rows */
+.table-row-cell:not(:selected) .text-deposit,
+.table-row-cell:not(:selected) .text-withdrawal,
+.table-row-cell:not(:selected) .recent-credit,
+.table-row-cell:not(:selected) .recent-debit {
+    /* Allows the color variables from the Java Controller to win over the silver base rules */
+    -fx-text-fill: inherit !important; 
 }
 
 /* Scrollbar styling to match the theme */
@@ -326,6 +325,7 @@
 
 
 /* --- SPECIAL TRANSACTION STATE CLASSES --- */
+
 /* Classes to be used in Java Controller CellFactories */
 .text-deposit {
     -fx-text-fill: #00FF7F; /* Sea Green */
@@ -368,4 +368,60 @@
 .progress-indicator .percentage {
     -fx-fill: transparent;
     -fx-visibility: hidden;
+}
+
+/* Styling the ComboBox to match navy-input and align the arrow */
+.combo-box.navy-input {
+    -fx-background-color: #0d2137; /* Matches your navy-input theme */
+    -fx-border-color: #34495e;
+    -fx-border-width: 0 0 2 0; /* Bottom border focus style */
+    -fx-text-fill: silver;
+}
+
+/* Forces the arrow-button (the clickable region) to the far right */
+.combo-box.navy-input .arrow-button {
+    -fx-background-color: transparent;
+    -fx-padding: 0 10 0 0; /* Adds a small margin from the right edge */
+}
+
+/* Style the arrow itself to match the silver text */
+.combo-box.navy-input .arrow {
+    -fx-background-color: silver;
+    -fx-mark-color: silver;
+}
+
+/* Ensure the text inside the ComboBox is also aligned and colored */
+.combo-box.navy-input .label {
+    -fx-text-fill: silver;
+}
+
+/* List view styling for the dropdown menu */
+.combo-box.navy-input .list-view {
+    -fx-background-color: #0d2137;
+    -fx-border-color: #34495e;
+}
+
+.combo-box.navy-input .list-cell {
+    -fx-text-fill: silver;
+    -fx-background-color: #0d2137;
+}
+
+.combo-box.navy-input .list-cell:hover {
+    -fx-background-color: #1a3a5a;
+}
+
+/* Loan Status styling for Approval and Pending */
+.status-approved {
+    -fx-text-fill: #2ecc71;
+    -fx-font-weight: bold;
+}
+
+.status-pending {
+    -fx-text-fill: #f39c12;
+    -fx-font-weight: bold;
+}
+
+.status-denied {
+    -fx-text-fill: #d32f2f; /* Dark Red */
+    -fx-font-weight: bold;
 }
