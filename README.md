@@ -129,16 +129,43 @@ Automatic Loan Approval upon Applying:
 https://github.com/user-attachments/assets/cc9715a7-dc8c-4c37-91d0-41810bb37213
 
 
-Make a payment on the Approved Loan:
+Make a payment and paying off the Approved Loan:
 
 
 https://github.com/user-attachments/assets/a33d8660-8567-44c1-9d07-f542c1fd5035
 
 
-Pay off the Approved Loan:
+Automatic Loan Denial upon Applying:
+
+
+https://github.com/user-attachments/assets/2e74b624-5051-438d-97c1-73c16683369c
+
+
+Pending high value Loan, awating on Approval:
+
+
+https://github.com/user-attachments/assets/401016e5-964a-428e-8972-2252e311bc00
+
+
+Approved Loan and making payment:
+
+
+https://github.com/user-attachments/assets/948781f2-776f-44b2-aa4b-48148db70ef7
+
+
+Paying off the high value Approved Loan:
 
 
 https://github.com/user-attachments/assets/f9ea7aaf-00a8-4e85-98c2-5186adadb511
+
+
+Pending high value Loan, awating on Denial:
+
+
+https://github.com/user-attachments/assets/dfbdf45d-b46f-4252-a3ff-d5db418dcd13
+
+
+https://github.com/user-attachments/assets/1d16dc9b-12c1-43f4-9860-f3d1cf73e63c
 
 
 Registration Signup Demonstration:
