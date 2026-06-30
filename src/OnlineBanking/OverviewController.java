@@ -11,8 +11,8 @@ import javafx.scene.control.Label;
  * formatted for a professional banking user interface.
  * 
  * @author: Gabriel Zayas
- * Date: 2/20/2026
- * @version 3.0
+ * Date: 6/22/2026
+ * @version 4.0
  * 
  */
 public class OverviewController {
@@ -84,4 +84,20 @@ public class OverviewController {
         }
     }
     
+    /**
+    * Refreshes the account data directly from the database and updates the UI.
+    * This ensures payments made in the Loan center are reflected here.
+    */
+   public void refreshBalance() {
+       if (account != null) {
+           // Fetch the fresh balance from UserStore using the stored account's user ID
+           double freshBalance = UserStore.getAccountBalance(account.getId(), "Checking");
+
+           // Update the local model so it stays in sync
+           account.setBalance(freshBalance);
+
+           // Push the new data to the labels
+           updateUI();
+       }
+   }
 }
