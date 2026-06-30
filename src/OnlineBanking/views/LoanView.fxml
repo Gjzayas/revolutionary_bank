@@ -1,0 +1,122 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.ComboBox?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.Separator?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.text.Font?>
+
+<AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="515.0" prefWidth="615.0" styleClass="dashboard-root" stylesheets="@../style/style.css" xmlns="http://javafx.com/javafx/23.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="OnlineBanking.LoanController">
+   <children>
+      <AnchorPane styleClass="account-card" AnchorPane.bottomAnchor="15.0" AnchorPane.leftAnchor="15.0" AnchorPane.rightAnchor="15.0" AnchorPane.topAnchor="15.0">
+         <children>
+            <!-- Header Section -->
+            <HBox layoutX="42.0" layoutY="25.0" prefHeight="40.0" prefWidth="500.0" spacing="10.0">
+               <children>
+                  <Label text="Revolutionary Bank Loan Center" textFill="SILVER">
+                     <font>
+                        <Font name="System Bold" size="24.0" />
+                     </font>
+                  </Label>
+               </children>
+            </HBox>
+
+            <!-- Main Content Area -->
+            <HBox layoutX="42.0" layoutY="80.0" spacing="40.0" AnchorPane.bottomAnchor="20.0" AnchorPane.leftAnchor="42.0" AnchorPane.rightAnchor="42.0" AnchorPane.topAnchor="80.0">
+               <children>
+
+                  <!-- Left Side: Information & Status Label -->
+                  <VBox prefWidth="240.0" spacing="15.0">
+                     <children>
+                        <Label text="Loan Information" textFill="SILVER">
+                           <font>
+                              <Font name="System Bold" size="16.0" />
+                           </font>
+                        </Label>
+                        <Label text="Our Quick-Check algorithm provides instant decisions for personal loans up to $50,000 with a Standard Rate of 5% APR on all loans." textFill="#bdc3c7" wrapText="true">
+                           <font>
+                              <Font size="13.0" />
+                           </font>
+                        </Label>
+
+                        <Separator opacity="0.2" prefWidth="200.0" />
+
+                        <!-- Status Container (Now only contains text info) -->
+                        <VBox fx:id="statusContainer" managed="false" spacing="10.0" visible="false">
+                            <children>
+                               <Label text="Current Status:" textFill="SILVER" />
+                               <Label fx:id="statusLabel" style="-fx-font-weight: bold;" text="PENDING" textFill="#3498db">
+                                  <font>
+                                     <Font size="18.0" />
+                                  </font>
+                               </Label>
+                               <Label text="Reviewer Note:" textFill="SILVER" />
+                               <Label fx:id="noteLabel" styleClass="success-label" text="Application received." wrapText="true" />
+                            </children>
+                         </VBox>
+                      </children>
+                  </VBox>
+
+                <!-- Right Side: The "Action Area" Container -->
+                <AnchorPane prefWidth="260.0">
+                    <children>
+
+                        <!-- Right Side of Status: Payment & Balance -->
+                        <VBox fx:id="paymentPanel" managed="false" visible="false" spacing="12.0" 
+                              style="-fx-background-color: rgba(255,255,255,0.03); -fx-padding: 15; -fx-background-radius: 10;"
+                              AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0">
+                            <children>
+                                <Label text="Balance Owed" textFill="SILVER">
+                                    <font><Font name="System Bold" size="14.0" /></font>
+                                </Label>
+                                <Label fx:id="loanBalanceLabel" styleClass="balance-label" />
+                                <Separator opacity="0.1" prefWidth="200.0" />
+                                
+                                <!-- Label for Monthly Payment and Due Date -->
+                                <Label fx:id="loanDetailLabel" text="Monthly Payment: $0.00 | Due: MM/DD/YYYY" textFill="#bdc3c7" wrapText="true">
+                                    <font>
+                                        <Font size="12.0" />
+                                    </font>
+                                </Label>
+                                <Separator opacity="0.1" prefWidth="200.0" />
+                                <Label text="Make a Payment" textFill="SILVER" />
+                                <VBox spacing="10.0">
+                                    <children>
+                                        <TextField fx:id="paymentField" promptText="Amount" styleClass="navy-input" />
+                                        <Button fx:id="payButton" maxWidth="Infinity" onAction="#handleMakePayment" styleClass="silver-button" text="Pay Now" />
+                                    </children>
+                                </VBox>
+                            </children>
+                        </VBox>
+
+                        <!-- Application Form -->
+                        <VBox fx:id="formContainer" spacing="12.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0">
+                            <children>
+                                <Label text="Apply for a New Loan" textFill="SILVER">
+                                    <font><Font name="System Bold" size="18.0" /></font>
+                                </Label>
+                                <Label text="Loan Amount ($):" textFill="SILVER" />
+                                <TextField fx:id="amountField" promptText="e.g. 5000" styleClass="navy-input" />
+                                <Label text="Term (Months):" textFill="SILVER" />
+                                <ComboBox fx:id="termComboBox" maxWidth="300.0" styleClass="navy-input" />
+                                <Label text="Monthly Income ($):" textFill="SILVER" />
+                                <TextField fx:id="incomeField" promptText="Gross monthly pay" styleClass="navy-input" />
+                                <Button fx:id="submitButton" mnemonicParsing="false" onAction="#handleSubmitLoan" prefWidth="260.0" styleClass="silver-button" text="Process Quick-Check">
+                                    <VBox.margin><Insets top="10.0" /></VBox.margin>
+                                </Button>
+                            </children>
+                        </VBox>
+
+                    </children>
+                </AnchorPane>
+               </children>
+            </HBox>
+         </children>
+      </AnchorPane>
+   </children>
+</AnchorPane>
