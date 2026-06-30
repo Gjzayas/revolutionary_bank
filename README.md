@@ -123,10 +123,22 @@ Short Video Demonstrations:
 
 🏛 New Loan Center Demonstrations:
 
-Automatic Loan Approval:
+Automatic Loan Approval upon Applying:
 
 
 https://github.com/user-attachments/assets/cc9715a7-dc8c-4c37-91d0-41810bb37213
+
+
+Make a payment on the Approved Loan:
+
+
+https://github.com/user-attachments/assets/a33d8660-8567-44c1-9d07-f542c1fd5035
+
+
+Pay off the Approved Loan:
+
+
+https://github.com/user-attachments/assets/f9ea7aaf-00a8-4e85-98c2-5186adadb511
 
 
 Registration Signup Demonstration:
