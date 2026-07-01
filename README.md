@@ -17,7 +17,7 @@ Version 4.0 introduces a state-of-the-art Automated Loan Request Center that mod
 
 4. Instant View Synchronization: Once processed, internal event hooks tell the dashboard to update balances and transaction history logs automatically.
 
-⚙️ Under the Hood: The Background Architecture
+⚙️ Under the Hood - The Background Architecture:
 The lending backend is explicitly decoupled from the user interface to ensure the primary GUI thread remains stutter-free:
 
 Isolated Thread Execution (LoanProcessor): Built using a ScheduledExecutorService pool (Executors.newSingleThreadScheduledExecutor()), the processor boots up concurrently during application initialization (App.java). It runs on an independent worker thread entirely insulated from the main JavaFX Application Thread.
@@ -119,49 +119,49 @@ Monitor execution panels to confirm all structural verification passes return su
 
 
 
-Short Video Demonstrations:
+🎥 Short Video Demonstrations:
 
-Note: If any of these short video demonstrations have trouble playing, please try refreshing your browser. Thank you, and enjoy!
+Note: If any of these short video demonstrations have trouble playing, please try refreshing your browser. Thank you and enjoy!
 
-🏛 New Loan Center Demonstrations:
+💸 New Loan Center Demonstrations:
 
-Automatic Loan Approval upon Applying for a loan under $50,000.00:
+✅ Automatic Loan Approval upon Applying for a loan under $50,000.00:
 
 
 https://github.com/user-attachments/assets/cc9715a7-dc8c-4c37-91d0-41810bb37213
 
 
-Make a payment and paying off the Approved Loan:
+💵 Make a payment and paying off the Approved Loan:
 
 
 https://github.com/user-attachments/assets/a33d8660-8567-44c1-9d07-f542c1fd5035
 
 
-Automatic Loan Denial upon Applying for a loan under $50,000.00:
+🚫 Automatic Loan Denial upon Applying for a loan under $50,000.00:
 
 
 https://github.com/user-attachments/assets/2e74b624-5051-438d-97c1-73c16683369c
 
 
-Pending high value Loan, and awating Approval:
+⏳✅ Pending high value Loan, and awating Approval:
 
 
 https://github.com/user-attachments/assets/401016e5-964a-428e-8972-2252e311bc00
 
 
-Approved high value Loan and making a payment:
+💵 Approved high value Loan and making a payment:
 
 
 https://github.com/user-attachments/assets/948781f2-776f-44b2-aa4b-48148db70ef7
 
 
-Paying off the high value Approved Loan:
+🎯 Paying off the high value Approved Loan:
 
 
 https://github.com/user-attachments/assets/f9ea7aaf-00a8-4e85-98c2-5186adadb511
 
 
-Pending high value Loan, awating Denial:
+⏳🚫 Pending high value Loan, awating Denial:
 
 
 https://github.com/user-attachments/assets/dfbdf45d-b46f-4252-a3ff-d5db418dcd13
@@ -170,7 +170,7 @@ https://github.com/user-attachments/assets/dfbdf45d-b46f-4252-a3ff-d5db418dcd13
 https://github.com/user-attachments/assets/1d16dc9b-12c1-43f4-9860-f3d1cf73e63c
 
 
-Registration Signup:
+👤 Registration Signup:
 
 
 https://github.com/user-attachments/assets/8c2909a7-0510-48f0-81fd-03fdbbfc6357
@@ -179,25 +179,25 @@ https://github.com/user-attachments/assets/8c2909a7-0510-48f0-81fd-03fdbbfc6357
 https://github.com/user-attachments/assets/879c54db-db28-4b1d-a3bf-788a26d9d6ae
 
 
-Login after Signup:
+🔑 Login after Signup:
 
 
 https://github.com/user-attachments/assets/fd13a607-6378-4942-9836-c3e9affbc7fb
 
 
-Profile Update - Updating User Fullname:
+⚙️ Profile Update - Updating User Fullname:
 
 
 https://github.com/user-attachments/assets/7170bf61-616f-44c4-b5f4-6cda585c143b
 
 
-Updating User Security Question and Answer:
+🔐 Updating User Security Question and Answer:
 
 
 https://github.com/user-attachments/assets/05403ba6-fefc-4c06-910a-7c55f135f23a
 
 
-Updating User Password:
+🛡️ Updating User Password:
 
 
 https://github.com/user-attachments/assets/68790800-8df4-4357-be7c-228084b55116
@@ -206,19 +206,19 @@ https://github.com/user-attachments/assets/68790800-8df4-4357-be7c-228084b55116
 https://github.com/user-attachments/assets/acdabebe-d18d-4f8f-83fc-ac95c2a906a2
 
 
-Transfering Funds to another Account:
+💸 Transfering Funds to another Account:
 
 
 https://github.com/user-attachments/assets/84048186-5c11-4fec-8eeb-8ec8090d2303
 
 
-Transaction History and Saving the Bank Statement:
+📋 Transaction History and Saving the Bank Statement:
 
 
 https://github.com/user-attachments/assets/ef1672b6-fae1-403f-a55a-714a4818a9be
 
 
-User Password Reset:
+🛡️ User Password Reset:
 
 
 https://github.com/user-attachments/assets/5fc6aab9-bed9-41d6-9b22-2e9d3b7ac745
@@ -227,25 +227,25 @@ https://github.com/user-attachments/assets/5fc6aab9-bed9-41d6-9b22-2e9d3b7ac745
 https://github.com/user-attachments/assets/40429520-b3ed-41e8-9c18-f2a74fe6494a
 
 
-Account Dashboard and History of Receiving Account from the New User Bank Transfer:
+📋 Account Dashboard and History of Receiving Account from the New User Bank Transfer:
 
 
 https://github.com/user-attachments/assets/79f82b74-2f8b-4447-bc6d-ccf0e7933e17
 
 
-Saving User Bank Statement:
+💾 Saving User Bank Statement:
 
 
 https://github.com/user-attachments/assets/715d6e5c-165c-476e-9379-9a5261e0646c
 
 
-Transfer Recipient Bank Statement:
+📋 Transfer Recipient Bank Statement:
 
 
 https://github.com/user-attachments/assets/484125db-fd8c-4723-8d30-10526759a6bf
 
 
-Delete User Account:
+🗑️ Delete User Account:
 
 
 https://github.com/user-attachments/assets/08109f11-424c-4617-bfe3-db7592043dd6
